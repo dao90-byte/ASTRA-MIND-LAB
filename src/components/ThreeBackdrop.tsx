@@ -64,18 +64,23 @@ export function ThreeBackdrop({
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
     let renderer: THREE.WebGLRenderer | null = null;
+    let scene: THREE.Scene | null = null;
+    let disposeEnv: (() => void) | null = null;
+    let glowTex: THREE.CanvasTexture | null = null;
+    let flareTex: THREE.CanvasTexture | null = null;
+    let stopLoop: (() => void) | null = null;
+    let onPointerMove: ((e: PointerEvent) => void) | null = null;
+    let onResize: (() => void) | null = null;
+    let onContextLost: ((e: Event) => void) | null = null;
+
     try {
       renderer = createCosmicRenderer(canvas, isSoftwareGl, true);
-    } catch {
-      setWebglFailed(true);
-      return;
-    }
 
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x030616, 0.034);
-    const disposeEnv = applyRoomEnvironment(renderer, scene);
-    const glowTex = createCrystalGlowTexture();
-    const flareTex = createStarFlareTexture();
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x030616, 0.034);
+      disposeEnv = applyRoomEnvironment(renderer, scene);
+      glowTex = createCrystalGlowTexture();
+      flareTex = createStarFlareTexture();
 
     const camera = new THREE.PerspectiveCamera(
       44,
@@ -454,13 +459,13 @@ export function ThreeBackdrop({
 
     let pointerX = 0;
     let pointerY = 0;
-    const onPointerMove = (e: PointerEvent) => {
+    onPointerMove = (e: PointerEvent) => {
       pointerX = (e.clientX / Math.max(1, window.innerWidth) - 0.5) * 2;
       pointerY = (e.clientY / Math.max(1, window.innerHeight) - 0.5) * 2;
     };
     window.addEventListener('pointermove', onPointerMove, { passive: true });
 
-    const onResize = () => {
+    onResize = () => {
       const w = Math.max(1, window.innerWidth);
       const h = Math.max(1, window.innerHeight);
       camera.aspect = w / h;
@@ -469,7 +474,7 @@ export function ThreeBackdrop({
     };
     window.addEventListener('resize', onResize);
 
-    const onContextLost = (e: Event) => {
+    onContextLost = (e: Event) => {
       e.preventDefault();
       setWebglFailed(true);
     };
@@ -479,7 +484,7 @@ export function ThreeBackdrop({
     let goldRingScale = selectedAgeRef.current === 9 ? 1 : 0.001;
     heroGroup.visible = showHeroRef.current;
 
-    const stopLoop = startPacedThreeLoop(renderer, scene, camera, isSoftwareGl, (dt, elapsed) => {
+    stopLoop = startPacedThreeLoop(renderer, scene, camera, isSoftwareGl, (dt, elapsed) => {
       const isAge9 = selectedAgeRef.current === 9;
       const activeHero = showHeroRef.current;
 
@@ -555,16 +560,25 @@ export function ThreeBackdrop({
       camera.position.lerp(_baseVec, Math.min(1, dt * 4.5));
       camera.lookAt(0, 0, 0);
     });
+    } catch {
+      glowTex?.dispose();
+      flareTex?.dispose();
+      disposeEnv?.();
+      if (scene) disposeThreeHierarchy(scene);
+      renderer?.dispose();
+      setWebglFailed(true);
+      return;
+    }
 
     return () => {
-      stopLoop();
-      window.removeEventListener('pointermove', onPointerMove);
-      window.removeEventListener('resize', onResize);
-      canvas.removeEventListener('webglcontextlost', onContextLost);
-      glowTex.dispose();
-      flareTex.dispose();
-      disposeEnv();
-      disposeThreeHierarchy(scene);
+      stopLoop?.();
+      if (onPointerMove) window.removeEventListener('pointermove', onPointerMove);
+      if (onResize) window.removeEventListener('resize', onResize);
+      if (onContextLost) canvas.removeEventListener('webglcontextlost', onContextLost);
+      glowTex?.dispose();
+      flareTex?.dispose();
+      disposeEnv?.();
+      if (scene) disposeThreeHierarchy(scene);
       renderer?.dispose();
     };
   }, []);

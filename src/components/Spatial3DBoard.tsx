@@ -54,11 +54,18 @@ function computeCenteredPositions(voxels: Voxel[]) {
 }
 
 function getOklchVoxelPalette(accent: Voxel['accent'], matched: boolean) {
-  if (matched || accent === 'mint') {
+  if (matched) {
     return {
-      shell: colorFromOklch(0.62, 0.22, 158),
-      core: colorFromOklch(0.95, 0.14, 152),
-      edge: colorFromOklch(0.98, 0.06, 155),
+      shell: colorFromOklch(0.66, 0.24, 152),
+      core: colorFromOklch(0.97, 0.14, 152),
+      edge: colorFromOklch(0.99, 0.06, 155),
+    };
+  }
+  if (accent === 'mint') {
+    return {
+      shell: colorFromOklch(0.62, 0.20, 168),
+      core: colorFromOklch(0.92, 0.14, 165),
+      edge: colorFromOklch(0.96, 0.06, 166),
     };
   }
   if (accent === 'amber') {
@@ -178,17 +185,20 @@ export function Spatial3DBoard({
     const isSoftwareGl = detectSoftwareWebGL();
 
     let renderer: THREE.WebGLRenderer | null = null;
+    let scene: THREE.Scene | null = null;
+    let disposeEnv: (() => void) | null = null;
+    let glowTex: THREE.CanvasTexture | null = null;
+    let ro: ResizeObserver | null = null;
+    let stopLoop: (() => void) | null = null;
+    let onContextLost: ((e: Event) => void) | null = null;
+
     try {
       renderer = createCosmicRenderer(canvas, isSoftwareGl, true);
-    } catch {
-      setWebglFailed(true);
-      return;
-    }
 
-    const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x030616, 0.042);
-    const disposeEnv = applyRoomEnvironment(renderer, scene);
-    const glowTex = createCrystalGlowTexture();
+      scene = new THREE.Scene();
+      scene.fog = new THREE.FogExp2(0x030616, 0.042);
+      disposeEnv = applyRoomEnvironment(renderer, scene);
+      glowTex = createCrystalGlowTexture();
 
     const camera = new THREE.PerspectiveCamera(40, 16 / 10, 0.1, 100);
     camera.position.set(5.35, 4.05, 6.15);
@@ -273,33 +283,34 @@ export function Spatial3DBoard({
       auraSprite.scale.setScalar(4.4);
       ped.add(auraSprite);
 
-      scene.add(ped);
+      safeScene.add(ped);
       return ped;
     };
 
+    const safeScene = scene;
     buildPedestal(-2.45, 2.45, colorFromOklch(0.84, 0.19, 158));
     buildPedestal(2.45, -2.45, colorFromOklch(0.85, 0.16, 196));
 
     const targetGroup = new THREE.Group();
     targetGroup.position.set(-2.45, 0.18, 2.45);
-    scene.add(targetGroup);
+    safeScene.add(targetGroup);
     targetGroupRef.current = targetGroup;
 
     const currentGroup = new THREE.Group();
     currentGroup.position.set(2.45, 0.18, -2.45);
-    scene.add(currentGroup);
+    safeScene.add(currentGroup);
     currentGroupRef.current = currentGroup;
 
-    const ro = new ResizeObserver(syncSize);
+    ro = new ResizeObserver(syncSize);
     ro.observe(container);
 
-    const onContextLost = (e: Event) => {
+    onContextLost = (e: Event) => {
       e.preventDefault();
       setWebglFailed(true);
     };
     canvas.addEventListener('webglcontextlost', onContextLost);
 
-    const stopLoop = startPacedThreeLoop(renderer, scene, camera, isSoftwareGl, (dt, elapsed) => {
+    stopLoop = startPacedThreeLoop(renderer, safeScene, camera, isSoftwareGl, (dt, elapsed) => {
       const bob = Math.sin(elapsed * 2.1) * 0.08;
       targetGroup.position.y = 0.18 + bob;
       currentGroup.position.y = 0.18 + bob;
@@ -311,15 +322,24 @@ export function Spatial3DBoard({
         targetGroup.rotation.y += dt * 1.4;
       }
     });
+    } catch {
+      safeCleanup();
+      setWebglFailed(true);
+      return;
+    }
+
+    function safeCleanup() {
+      stopLoop?.();
+      ro?.disconnect();
+      if (onContextLost) canvas?.removeEventListener('webglcontextlost', onContextLost);
+      glowTex?.dispose();
+      disposeEnv?.();
+      if (scene) disposeThreeHierarchy(scene);
+      renderer?.dispose();
+    }
 
     return () => {
-      stopLoop();
-      ro.disconnect();
-      canvas.removeEventListener('webglcontextlost', onContextLost);
-      glowTex.dispose();
-      disposeEnv();
-      disposeThreeHierarchy(scene);
-      renderer?.dispose();
+      safeCleanup();
     };
   }, []);
 

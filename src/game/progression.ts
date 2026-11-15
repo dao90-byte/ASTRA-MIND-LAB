@@ -72,10 +72,9 @@ export function hasEarnedMedal(progress: AllProgress, age: AgeGroup, stage: Stag
 }
 
 export function loadProgress(storage?: Pick<Storage, 'getItem'>): AllProgress {
-  const target = storage ?? (typeof window !== 'undefined' ? window.localStorage : undefined);
-  if (!target) return createInitialProgress();
-
   try {
+    const target = storage ?? (typeof window !== 'undefined' ? window.localStorage : undefined);
+    if (!target) return createInitialProgress();
     const raw = target.getItem(STORAGE_KEY);
     if (!raw) return createInitialProgress();
     const parsed = JSON.parse(raw) as Partial<AllProgress>;
@@ -113,11 +112,11 @@ export function saveProgress(
   progress: AllProgress,
   storage?: Pick<Storage, 'setItem'>
 ): void {
-  const target = storage ?? (typeof window !== 'undefined' ? window.localStorage : undefined);
-  if (!target) return;
   try {
+    const target = storage ?? (typeof window !== 'undefined' ? window.localStorage : undefined);
+    if (!target) return;
     target.setItem(STORAGE_KEY, JSON.stringify(progress));
   } catch {
-    // Ignore storage quota errors silently
+    // Ignore storage quota or iframe SecurityError silently
   }
 }
