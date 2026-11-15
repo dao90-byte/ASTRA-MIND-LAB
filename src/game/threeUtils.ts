@@ -1,6 +1,21 @@
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 
+export function isWebGLAvailable(): boolean {
+  if (typeof document === 'undefined') return false;
+  try {
+    const canvas = document.createElement('canvas');
+    const gl =
+      canvas.getContext('webgl2', { failIfMajorPerformanceCaveat: false }) ||
+      canvas.getContext('webgl', { failIfMajorPerformanceCaveat: false });
+    if (!gl) return false;
+    gl.getExtension('WEBGL_lose_context')?.loseContext();
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function detectSoftwareWebGL(): boolean {
   if (typeof document === 'undefined') return true;
   try {
@@ -206,7 +221,8 @@ export function startPacedThreeLoop(
   scene: THREE.Scene,
   camera: THREE.Camera,
   isSoftwareGl: boolean,
-  onTick: (dt: number, elapsed: number) => void
+  onTick: (dt: number, elapsed: number) => void,
+  onError?: () => void
 ): () => void {
   let disposed = false;
   let timerId = 0;
@@ -216,19 +232,26 @@ export function startPacedThreeLoop(
 
   const stepFrame = () => {
     if (disposed) return;
-    const now = performance.now();
-    const dt = Math.min((now - lastNow) / 1000, 0.05);
-    lastNow = now;
-    elapsed += dt;
-    onTick(dt, elapsed);
-    renderer.render(scene, camera);
+    try {
+      const now = performance.now();
+      const dt = Math.min((now - lastNow) / 1000, 0.05);
+      lastNow = now;
+      elapsed += dt;
+      onTick(dt, elapsed);
+      renderer.render(scene, camera);
+    } catch {
+      disposed = true;
+      window.clearTimeout(timerId);
+      cancelAnimationFrame(rafId);
+      onError?.();
+    }
   };
 
   if (!isSoftwareGl) {
     const loop = () => {
       if (disposed) return;
       stepFrame();
-      rafId = requestAnimationFrame(loop);
+      if (!disposed) rafId = requestAnimationFrame(loop);
     };
     rafId = requestAnimationFrame(loop);
     return () => {
@@ -241,6 +264,7 @@ export function startPacedThreeLoop(
   const renderOnceAndPace = () => {
     if (disposed) return;
     stepFrame();
+    if (disposed) return;
 
     const gl = renderer.getContext() as WebGL2RenderingContext | null;
     if (gl && typeof gl.fenceSync === 'function') {

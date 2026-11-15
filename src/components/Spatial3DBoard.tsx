@@ -18,6 +18,7 @@ import {
   createCrystalGlowTexture,
   detectSoftwareWebGL,
   disposeThreeHierarchy,
+  isWebGLAvailable,
   startPacedThreeLoop,
 } from '../game/threeUtils';
 import { AgeGroup } from '../game/types';
@@ -182,6 +183,10 @@ export function Spatial3DBoard({
     const canvas = canvasRef.current;
     const container = containerRef.current;
     if (!canvas || !container) return;
+    if (!isWebGLAvailable()) {
+      setWebglFailed(true);
+      return;
+    }
     const isSoftwareGl = detectSoftwareWebGL();
 
     let renderer: THREE.WebGLRenderer | null = null;
@@ -321,7 +326,7 @@ export function Spatial3DBoard({
       if (wonRef.current) {
         targetGroup.rotation.y += dt * 1.4;
       }
-    });
+    }, () => setWebglFailed(true));
     } catch {
       safeCleanup();
       setWebglFailed(true);

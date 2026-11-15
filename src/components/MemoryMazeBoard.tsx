@@ -42,8 +42,8 @@ export function MemoryMazeBoard({
     let raf = 0;
 
     const tick = (now: number) => {
-      const elapsed = now - startAt;
-      const pct = Math.max(0, 100 - (elapsed / spec.observeMs) * 100);
+      const elapsed = Math.max(0, now - startAt);
+      const pct = Math.min(100, Math.max(0, 100 - (elapsed / spec.observeMs) * 100));
       setProgressPct(pct);
       if (elapsed >= spec.observeMs) {
         setPhase('recall');
@@ -87,7 +87,7 @@ export function MemoryMazeBoard({
   };
 
   const head = tracedPath[tracedPath.length - 1];
-  const recallPct = Math.min(100, (tracedPath.length / spec.safePath.length) * 100);
+  const recallPct = Math.max(0, Math.min(100, (tracedPath.length / spec.safePath.length) * 100));
 
   const cometPos = useMemo(() => {
     if (phase !== 'observe' || spec.safePath.length < 2) return null;

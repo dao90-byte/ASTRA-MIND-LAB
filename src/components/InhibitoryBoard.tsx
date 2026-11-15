@@ -103,7 +103,10 @@ export function InhibitoryBoard({
   };
 
   const remainingMoves = Math.max(0, spec.maxMoves - state.turn);
-  const budgetPct = spec.maxMoves > 0 ? (remainingMoves / spec.maxMoves) * 100 : 0;
+  const budgetPct =
+    spec.maxMoves > 0
+      ? Math.min(100, Math.max(0, (remainingMoves / spec.maxMoves) * 100))
+      : 0;
 
   return (
     <div className="h-full w-full flex flex-col items-center justify-between gap-3 py-2">

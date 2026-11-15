@@ -9,6 +9,7 @@ import {
   createStarFlareTexture,
   detectSoftwareWebGL,
   disposeThreeHierarchy,
+  isWebGLAvailable,
   startPacedThreeLoop,
 } from '../game/threeUtils';
 import { AgeGroup } from '../game/types';
@@ -59,6 +60,10 @@ export function ThreeBackdrop({
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    if (!isWebGLAvailable()) {
+      setWebglFailed(true);
+      return;
+    }
 
     const isSoftwareGl = detectSoftwareWebGL();
     const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -559,7 +564,7 @@ export function ThreeBackdrop({
       _baseVec.set(pointerX * 0.95, 0.25 - pointerY * 0.52, 13.8);
       camera.position.lerp(_baseVec, Math.min(1, dt * 4.5));
       camera.lookAt(0, 0, 0);
-    });
+    }, () => setWebglFailed(true));
     } catch {
       glowTex?.dispose();
       flareTex?.dispose();

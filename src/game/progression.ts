@@ -77,7 +77,8 @@ export function loadProgress(storage?: Pick<Storage, 'getItem'>): AllProgress {
     if (!target) return createInitialProgress();
     const raw = target.getItem(STORAGE_KEY);
     if (!raw) return createInitialProgress();
-    const parsed = JSON.parse(raw) as Partial<AllProgress>;
+    const parsed = JSON.parse(raw) as Partial<AllProgress> | null;
+    if (!parsed || typeof parsed !== 'object') return createInitialProgress();
     const sanitizeAge = (rawAge?: Partial<AgeProgress>): AgeProgress => {
       const highest =
         typeof rawAge?.highestUnlocked === 'number' &&
