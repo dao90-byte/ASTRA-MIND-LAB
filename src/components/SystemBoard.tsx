@@ -8,6 +8,7 @@ import {
   Direction,
   ModuleKind,
   SimulationResult,
+  SystemStageNumber,
   getAndInputPorts,
   getAndOutputPort,
   getSystemStage,
@@ -16,9 +17,10 @@ import {
 import { cosmicSound } from '../game/sound';
 import { AgeGroup } from '../game/types';
 
-const TOOL_ORDER: Array<'elbow' | 'straight' | 'splitter' | 'bridge' | 'converter'> = [
+const TOOL_ORDER: Array<'elbow' | 'straight' | 'mirror' | 'splitter' | 'bridge' | 'converter'> = [
   'elbow',
   'straight',
+  'mirror',
   'splitter',
   'bridge',
   'converter',
@@ -39,12 +41,14 @@ function ModuleGlyph({
   kind,
   rot,
   color,
+  portalId,
   andState,
   ghost = false,
 }: {
   kind: ModuleKind;
   rot: Direction;
   color?: BeamColor;
+  portalId?: 'A' | 'B';
   andState?: { inputA: boolean; inputB: boolean; fired: boolean };
   ghost?: boolean;
 }) {
@@ -91,12 +95,41 @@ function ModuleGlyph({
     );
   }
 
-  if (kind === 'and_gate') {
+  if (kind === 'portal') {
+    const pCol = portalId === 'B' ? '#2DF59A' : '#FF4EC6';
+    return (
+      <svg viewBox="0 0 100 100" className="w-full h-full" aria-hidden="true">
+        <polygon
+          points="50,10 85,28 85,72 50,90 15,72 15,28"
+          fill={`${pCol}1F`}
+          stroke={pCol}
+          strokeWidth="2.8"
+          strokeDasharray="6 4"
+        />
+        <polygon
+          points="50,22 78,50 50,78 22,50"
+          fill="#0B1034"
+          stroke={pCol}
+          strokeWidth="3.2"
+        />
+        <polygon
+          points="50,35 65,50 50,65 35,50"
+          fill={pCol}
+          stroke="#FFFFFF"
+          strokeWidth="1.5"
+        />
+      </svg>
+    );
+  }
+
+  if (kind === 'and_gate' || kind === 'xor_gate') {
+    const isXor = kind === 'xor_gate';
     const [pA, pB] = getAndInputPorts(rot);
     const outP = getAndOutputPort(rot);
     const [ax, ay] = portPoint(pA);
     const [bx, by] = portPoint(pB);
     const [ox, oy] = portPoint(outP);
+    const gateStroke = andState?.fired ? '#2DF59A' : isXor ? '#FF4EC6' : '#B378FF';
     return (
       <svg viewBox="0 0 100 100" className="w-full h-full" aria-hidden="true">
         <line x1={ax} y1={ay} x2="50" y2="50" stroke={andState?.inputA ? '#22EBFF' : '#5864A8'} strokeWidth="6.5" strokeLinecap="square" />
@@ -105,12 +138,32 @@ function ModuleGlyph({
         <polygon
           points="50,18 82,50 50,82 18,50"
           fill={andState?.fired ? '#0E4A42' : '#121847'}
-          stroke={andState?.fired ? '#2DF59A' : '#B378FF'}
+          stroke={gateStroke}
           strokeWidth="3.4"
           strokeLinejoin="miter"
         />
-        <polygon points="41,45 45.5,50 41,55 36.5,50" fill={andState?.inputA ? '#22EBFF' : '#3B447D'} stroke="#FFFFFF" strokeWidth="1.2" />
-        <polygon points="59,45 63.5,50 59,55 54.5,50" fill={andState?.inputB ? '#22EBFF' : '#3B447D'} stroke="#FFFFFF" strokeWidth="1.2" />
+        {isXor ? (
+          <>
+            <polygon
+              points="50,27 73,50 50,73 27,50"
+              fill="none"
+              stroke={gateStroke}
+              strokeWidth="1.8"
+              strokeDasharray="4 3"
+            />
+            <polygon
+              points="50,41 59,50 50,59 41,50"
+              fill={andState?.fired ? '#2DF59A' : '#FF4EC6'}
+              stroke="#FFFFFF"
+              strokeWidth="1.4"
+            />
+          </>
+        ) : (
+          <>
+            <polygon points="41,45 45.5,50 41,55 36.5,50" fill={andState?.inputA ? '#22EBFF' : '#3B447D'} stroke="#FFFFFF" strokeWidth="1.2" />
+            <polygon points="59,45 63.5,50 59,55 54.5,50" fill={andState?.inputB ? '#22EBFF' : '#3B447D'} stroke="#FFFFFF" strokeWidth="1.2" />
+          </>
+        )}
       </svg>
     );
   }
@@ -124,6 +177,18 @@ function ModuleGlyph({
         )}
         {kind === 'elbow' && (
           <path d="M50 0V50H100" fill="none" stroke={pipeColor} strokeWidth="9.5" strokeLinecap="square" strokeLinejoin="miter" />
+        )}
+        {kind === 'mirror' && (
+          <g>
+            {/* Double-sided 45-degree crystal prism mirror ('/' when rot=0) */}
+            <polygon
+              points="82,12 88,18 18,88 12,82"
+              fill="#22EBFF"
+              stroke="#FFFFFF"
+              strokeWidth="2.4"
+            />
+            <path d="M0 50L50 0M100 50L50 100" stroke="#99FBFF" strokeWidth="3.5" strokeDasharray="5 5" opacity="0.78" />
+          </g>
         )}
         {kind === 'splitter' && (
           <g>
@@ -157,7 +222,7 @@ export function SystemBoard({
   onWin,
 }: {
   age: AgeGroup;
-  stageNumber: 1 | 5;
+  stageNumber: SystemStageNumber;
   resetSignal: number;
   onWin: () => void;
 }) {
@@ -320,123 +385,166 @@ export function SystemBoard({
     return map;
   }, [simResult, animStep]);
 
+  // Collect portal pairs for visual quantum tether overlay
+  const portalTethers = useMemo(() => {
+    const byId: Record<string, Array<{ r: number; c: number }>> = {};
+    grid.forEach((row, r) =>
+      row.forEach((cell, c) => {
+        if (cell.kind === 'portal') {
+          const pid = cell.portalId ?? 'A';
+          byId[pid] = [...(byId[pid] ?? []), { r, c }];
+        }
+      })
+    );
+    return Object.entries(byId).filter(([, list]) => list.length === 2);
+  }, [grid]);
+
   return (
     <div className="h-full w-full flex flex-col items-center justify-between gap-3 py-2">
       {/* Main Interactive Circuit Grid */}
       <div className="flex-1 flex items-center justify-center w-full min-h-0">
         <div
-          className="grid gap-1.5 p-3 rounded-2xl cosmo-panel border border-[#22EBFF]/45"
+          className="relative p-3 rounded-2xl cosmo-panel border border-[#22EBFF]/45"
           style={{
-            gridTemplateColumns: `repeat(${spec.cols}, minmax(0, 1fr))`,
-            gridTemplateRows: `repeat(${spec.rows}, minmax(0, 1fr))`,
             width: spec.cols === 5 ? 'min(78vw, 440px)' : 'min(82vw, 476px)',
             aspectRatio: `${spec.cols} / ${spec.rows}`,
           }}
           data-testid="system-grid"
         >
-          {grid.map((row, r) =>
-            row.map((cell, c) => {
-              const segs = visibleSegments.get(`${r},${c}`) ?? [];
-              const andState = simResult?.andGatesState.find((g) => g.r === r && g.c === c);
-              const targetMatched = simResult?.energizedTargets.find(
-                (t) => t.r === r && t.c === c && animStep >= simResult.maxStep
-              )?.matched;
-
-              const showGhost =
-                !cell.locked &&
-                cell.kind === 'empty' &&
-                hoveredCell?.r === r &&
-                hoveredCell?.c === c &&
-                selectedTool !== 'erase' &&
-                (remainingInventory[selectedTool] ?? 0) > 0;
-
-              return (
-                <button
-                  key={`${r}-${c}`}
-                  type="button"
-                  onClick={() => handleCellClick(r, c)}
-                  onContextMenu={(e) => handleCellContextMenu(e, r, c)}
-                  onMouseEnter={() => setHoveredCell({ r, c })}
-                  onMouseLeave={() => setHoveredCell(null)}
-                  disabled={cell.locked}
-                  aria-label={`Grid cell ${r + 1},${c + 1} ${cell.kind}`}
-                  className={`group relative rounded-xl border transition-all duration-150 flex items-center justify-center p-1 cosmo-tile ${
-                    cell.locked
-                      ? 'bg-[#0E133D] border-[#2E3878] cursor-default'
-                      : cell.kind === 'empty'
-                      ? 'bg-[#080B26] border-[#222B5E] hover:border-[#22EBFF]/80 hover:bg-[#10184A] cursor-pointer'
-                      : 'bg-[#121D54] border-[#22EBFF]/80 hover:border-[#22EBFF] shadow-[0_0_24px_oklch(0.87_0.16_196_/_0.26)] cursor-pointer'
-                  } ${targetMatched ? 'ring-2 ring-[#2DF59A] shadow-[0_0_34px_oklch(0.86_0.19_158_/_0.65)]' : ''}`}
-                >
-                  {cell.kind !== 'empty' && (
-                    <ModuleGlyph
-                      kind={cell.kind}
-                      rot={cell.rot}
-                      color={cell.color}
-                      andState={animStep >= 0 ? andState : undefined}
-                    />
-                  )}
-
-                  {showGhost && <ModuleGlyph kind={selectedTool} rot={0} ghost />}
-
-                  {!cell.locked && cell.kind !== 'empty' && selectedTool !== 'erase' && (
-                    <span
-                      className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-90 transition-opacity text-[#22EBFF] pointer-events-none"
-                      aria-hidden="true"
-                    >
-                      <RotateCw className="w-3.5 h-3.5" />
-                    </span>
-                  )}
-
-                  {segs.length > 0 && (
-                    <svg
-                      viewBox="0 0 100 100"
-                      className="absolute inset-0 w-full h-full pointer-events-none"
-                      aria-hidden="true"
-                    >
-                      {segs.map((seg, idx) => {
-                        const stroke = beamHex(seg.color);
-                        const [fx, fy] =
-                          seg.fromDir !== null ? portPoint(seg.fromDir) : [50, 50];
-                        const [tx, ty] =
-                          seg.toDir !== null ? portPoint(seg.toDir) : [50, 50];
-                        return (
-                          <g key={idx}>
-                            <path
-                              d={`M ${fx} ${fy} L 50 50 L ${tx} ${ty}`}
-                              fill="none"
-                              stroke={stroke}
-                              strokeWidth="16"
-                              strokeOpacity="0.32"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <path
-                              d={`M ${fx} ${fy} L 50 50 L ${tx} ${ty}`}
-                              fill="none"
-                              stroke={stroke}
-                              strokeWidth="6.5"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                            <path
-                              d={`M ${fx} ${fy} L 50 50 L ${tx} ${ty}`}
-                              fill="none"
-                              stroke="#FFFFFF"
-                              strokeWidth="2.2"
-                              strokeOpacity="0.92"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            />
-                          </g>
-                        );
-                      })}
-                    </svg>
-                  )}
-                </button>
-              );
-            })
+          {portalTethers.length > 0 && (
+            <svg
+              viewBox={`0 0 ${spec.cols * 100} ${spec.rows * 100}`}
+              className="absolute inset-3 w-[calc(100%-1.5rem)] h-[calc(100%-1.5rem)] pointer-events-none z-30"
+              aria-hidden="true"
+            >
+              {portalTethers.map(([pid, [a, b]]) => (
+                <line
+                  key={pid}
+                  x1={a.c * 100 + 50}
+                  y1={a.r * 100 + 50}
+                  x2={b.c * 100 + 50}
+                  y2={b.r * 100 + 50}
+                  stroke={pid === 'B' ? '#2DF59A' : '#FF4EC6'}
+                  strokeOpacity="0.45"
+                  strokeWidth="2.6"
+                  strokeDasharray="6 6"
+                />
+              ))}
+            </svg>
           )}
+
+          <div
+            className="relative z-20 grid gap-1.5 w-full h-full"
+            style={{
+              gridTemplateColumns: `repeat(${spec.cols}, minmax(0, 1fr))`,
+              gridTemplateRows: `repeat(${spec.rows}, minmax(0, 1fr))`,
+            }}
+          >
+            {grid.map((row, r) =>
+              row.map((cell, c) => {
+                const segs = visibleSegments.get(`${r},${c}`) ?? [];
+                const andState = simResult?.andGatesState.find((g) => g.r === r && g.c === c);
+                const targetMatched = simResult?.energizedTargets.find(
+                  (t) => t.r === r && t.c === c && animStep >= simResult.maxStep
+                )?.matched;
+
+                const showGhost =
+                  !cell.locked &&
+                  cell.kind === 'empty' &&
+                  hoveredCell?.r === r &&
+                  hoveredCell?.c === c &&
+                  selectedTool !== 'erase' &&
+                  (remainingInventory[selectedTool] ?? 0) > 0;
+
+                return (
+                  <button
+                    key={`${r}-${c}`}
+                    type="button"
+                    onClick={() => handleCellClick(r, c)}
+                    onContextMenu={(e) => handleCellContextMenu(e, r, c)}
+                    onMouseEnter={() => setHoveredCell({ r, c })}
+                    onMouseLeave={() => setHoveredCell(null)}
+                    disabled={cell.locked}
+                    aria-label={`Grid cell ${r + 1},${c + 1} ${cell.kind}`}
+                    className={`group relative rounded-xl border transition-all duration-150 flex items-center justify-center p-1 cosmo-tile ${
+                      cell.locked
+                        ? 'bg-[#0E133D] border-[#2E3878] cursor-default'
+                        : cell.kind === 'empty'
+                        ? 'bg-[#080B26] border-[#222B5E] hover:border-[#22EBFF]/80 hover:bg-[#10184A] cursor-pointer'
+                        : 'bg-[#121D54] border-[#22EBFF]/80 hover:border-[#22EBFF] shadow-[0_0_24px_oklch(0.87_0.16_196_/_0.26)] cursor-pointer'
+                    } ${targetMatched ? 'ring-2 ring-[#2DF59A] shadow-[0_0_34px_oklch(0.86_0.19_158_/_0.65)]' : ''}`}
+                  >
+                    {cell.kind !== 'empty' && (
+                      <ModuleGlyph
+                        kind={cell.kind}
+                        rot={cell.rot}
+                        color={cell.color}
+                        portalId={cell.portalId}
+                        andState={animStep >= 0 ? andState : undefined}
+                      />
+                    )}
+
+                    {showGhost && <ModuleGlyph kind={selectedTool} rot={0} ghost />}
+
+                    {!cell.locked && cell.kind !== 'empty' && selectedTool !== 'erase' && (
+                      <span
+                        className="absolute bottom-1 right-1 opacity-0 group-hover:opacity-90 transition-opacity text-[#22EBFF] pointer-events-none"
+                        aria-hidden="true"
+                      >
+                        <RotateCw className="w-3.5 h-3.5" />
+                      </span>
+                    )}
+
+                    {segs.length > 0 && (
+                      <svg
+                        viewBox="0 0 100 100"
+                        className="absolute inset-0 w-full h-full pointer-events-none"
+                        aria-hidden="true"
+                      >
+                        {segs.map((seg, idx) => {
+                          const stroke = beamHex(seg.color);
+                          const [fx, fy] =
+                            seg.fromDir !== null ? portPoint(seg.fromDir) : [50, 50];
+                          const [tx, ty] =
+                            seg.toDir !== null ? portPoint(seg.toDir) : [50, 50];
+                          return (
+                            <g key={idx}>
+                              <path
+                                d={`M ${fx} ${fy} L 50 50 L ${tx} ${ty}`}
+                                fill="none"
+                                stroke={stroke}
+                                strokeWidth="16"
+                                strokeOpacity="0.32"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d={`M ${fx} ${fy} L 50 50 L ${tx} ${ty}`}
+                                fill="none"
+                                stroke={stroke}
+                                strokeWidth="6.5"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                              <path
+                                d={`M ${fx} ${fy} L 50 50 L ${tx} ${ty}`}
+                                fill="none"
+                                stroke="#FFFFFF"
+                                strokeWidth="2.2"
+                                strokeOpacity="0.92"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </g>
+                          );
+                        })}
+                      </svg>
+                    )}
+                  </button>
+                );
+              })
+            )}
+          </div>
         </div>
       </div>
 

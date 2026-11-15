@@ -5,38 +5,49 @@ export interface MazeCoord {
   c: number;
 }
 
+export type MemoryStageNumber = 3 | 11 | 16;
+
 export interface MemoryMazeSpec {
   id: string;
   age: AgeGroup;
+  stageNumber: MemoryStageNumber;
   rows: number;
   cols: number;
   observeMs: number;
   start: MazeCoord;
   goal: MazeCoord;
   safePath: MazeCoord[]; // Ordered constellation path from start to goal
+  decoyCells?: MazeCoord[]; // Isolated distractor stars shown during observe phase
+  waypoints?: MazeCoord[]; // Key harmonic crystal checkpoints along safePath
 }
 
 export interface Voxel {
   x: number;
   y: number;
   z: number;
-  accent: 'cyan' | 'amber' | 'violet';
+  accent: 'cyan' | 'amber' | 'violet' | 'mint';
 }
 
 export type Axis3D = 'x' | 'y' | 'z';
+export type Spatial3DStageNumber = 7 | 12 | 17;
 
 export interface Spatial3DSpec {
   id: string;
   age: AgeGroup;
+  stageNumber: Spatial3DStageNumber;
   target: Voxel[];
   initial: Voxel[];
 }
 
-export function getMemoryMazeStage(age: AgeGroup): MemoryMazeSpec {
-  if (age === 7) {
+export function getMemoryMazeStage(
+  age: AgeGroup,
+  stageNumber: MemoryStageNumber = 3
+): MemoryMazeSpec {
+  if (age === 7 && stageNumber === 3) {
     return {
       id: 'mem-7-3',
       age: 7,
+      stageNumber: 3,
       rows: 4,
       cols: 4,
       observeMs: 3600,
@@ -54,28 +65,181 @@ export function getMemoryMazeStage(age: AgeGroup): MemoryMazeSpec {
     };
   }
 
+  if (age === 7 && stageNumber === 11) {
+    return {
+      id: 'mem-7-11',
+      age: 7,
+      stageNumber: 11,
+      rows: 4,
+      cols: 4,
+      observeMs: 4100,
+      start: { r: 3, c: 3 },
+      goal: { r: 2, c: 0 },
+      safePath: [
+        { r: 3, c: 3 },
+        { r: 2, c: 3 },
+        { r: 1, c: 3 },
+        { r: 0, c: 3 },
+        { r: 0, c: 2 },
+        { r: 0, c: 1 },
+        { r: 1, c: 1 },
+        { r: 2, c: 1 },
+        { r: 2, c: 0 },
+      ],
+      decoyCells: [
+        { r: 2, c: 2 },
+        { r: 0, c: 0 },
+      ],
+      waypoints: [
+        { r: 0, c: 3 },
+        { r: 2, c: 1 },
+      ],
+    };
+  }
+
+  if (age === 7 && stageNumber === 16) {
+    return {
+      id: 'mem-7-16',
+      age: 7,
+      stageNumber: 16,
+      rows: 5,
+      cols: 5,
+      observeMs: 4500,
+      start: { r: 4, c: 0 },
+      goal: { r: 2, c: 4 },
+      safePath: [
+        { r: 4, c: 0 },
+        { r: 3, c: 0 },
+        { r: 2, c: 0 },
+        { r: 1, c: 0 },
+        { r: 0, c: 0 },
+        { r: 0, c: 1 },
+        { r: 0, c: 2 },
+        { r: 1, c: 2 },
+        { r: 2, c: 2 },
+        { r: 2, c: 3 },
+        { r: 2, c: 4 },
+      ],
+      decoyCells: [
+        { r: 2, c: 1 },
+        { r: 4, c: 2 },
+        { r: 0, c: 4 },
+      ],
+      waypoints: [
+        { r: 0, c: 0 },
+        { r: 2, c: 2 },
+      ],
+    };
+  }
+
+  if (age === 9 && stageNumber === 3) {
+    return {
+      id: 'mem-9-3',
+      age: 9,
+      stageNumber: 3,
+      rows: 5,
+      cols: 5,
+      observeMs: 4400,
+      start: { r: 4, c: 0 },
+      goal: { r: 0, c: 4 },
+      safePath: [
+        { r: 4, c: 0 },
+        { r: 3, c: 0 },
+        { r: 2, c: 0 },
+        { r: 2, c: 1 },
+        { r: 2, c: 2 },
+        { r: 3, c: 2 },
+        { r: 4, c: 2 },
+        { r: 4, c: 3 },
+        { r: 4, c: 4 },
+        { r: 3, c: 4 },
+        { r: 2, c: 4 },
+        { r: 1, c: 4 },
+        { r: 0, c: 4 },
+      ],
+    };
+  }
+
+  if (age === 9 && stageNumber === 11) {
+    return {
+      id: 'mem-9-11',
+      age: 9,
+      stageNumber: 11,
+      rows: 5,
+      cols: 5,
+      observeMs: 4700,
+      start: { r: 0, c: 0 },
+      goal: { r: 4, c: 4 },
+      safePath: [
+        { r: 0, c: 0 },
+        { r: 0, c: 1 },
+        { r: 0, c: 2 },
+        { r: 0, c: 3 },
+        { r: 0, c: 4 },
+        { r: 1, c: 4 },
+        { r: 2, c: 4 },
+        { r: 2, c: 3 },
+        { r: 2, c: 2 },
+        { r: 2, c: 1 },
+        { r: 3, c: 1 },
+        { r: 4, c: 1 },
+        { r: 4, c: 2 },
+        { r: 4, c: 3 },
+        { r: 4, c: 4 },
+      ],
+      decoyCells: [
+        { r: 1, c: 1 },
+        { r: 1, c: 2 },
+        { r: 3, c: 3 },
+      ],
+      waypoints: [
+        { r: 0, c: 4 },
+        { r: 2, c: 1 },
+      ],
+    };
+  }
+
+  // Age 9, Stage 16: 6x6 Deep-Space Serpentine Nebula + Decoys
   return {
-    id: 'mem-9-3',
+    id: 'mem-9-16',
     age: 9,
-    rows: 5,
-    cols: 5,
-    observeMs: 4400,
-    start: { r: 4, c: 0 },
-    goal: { r: 0, c: 4 },
+    stageNumber: 16,
+    rows: 6,
+    cols: 6,
+    observeMs: 5200,
+    start: { r: 5, c: 0 },
+    goal: { r: 5, c: 2 },
     safePath: [
+      { r: 5, c: 0 },
       { r: 4, c: 0 },
       { r: 3, c: 0 },
       { r: 2, c: 0 },
-      { r: 2, c: 1 },
-      { r: 2, c: 2 },
+      { r: 1, c: 0 },
+      { r: 0, c: 0 },
+      { r: 0, c: 1 },
+      { r: 0, c: 2 },
+      { r: 0, c: 3 },
+      { r: 0, c: 4 },
+      { r: 0, c: 5 },
+      { r: 1, c: 5 },
+      { r: 2, c: 5 },
+      { r: 3, c: 5 },
+      { r: 3, c: 4 },
+      { r: 3, c: 3 },
       { r: 3, c: 2 },
       { r: 4, c: 2 },
-      { r: 4, c: 3 },
+      { r: 5, c: 2 },
+    ],
+    decoyCells: [
+      { r: 2, c: 2 },
+      { r: 2, c: 3 },
       { r: 4, c: 4 },
-      { r: 3, c: 4 },
-      { r: 2, c: 4 },
-      { r: 1, c: 4 },
-      { r: 0, c: 4 },
+      { r: 5, c: 4 },
+    ],
+    waypoints: [
+      { r: 0, c: 0 },
+      { r: 0, c: 5 },
+      { r: 3, c: 2 },
     ],
   };
 }
@@ -178,39 +342,128 @@ export function voxelsMatch(a: Voxel[], b: Voxel[]): boolean {
   return true;
 }
 
-export function getSpatial3DStage(age: AgeGroup): Spatial3DSpec {
-  if (age === 7) {
+export function getSpatial3DStage(
+  age: AgeGroup,
+  stageNumber: Spatial3DStageNumber = 7
+): Spatial3DSpec {
+  if (age === 7 && stageNumber === 7) {
     const target: Voxel[] = normalizeVoxels([
       { x: 0, y: 0, z: 0, accent: 'cyan' },
       { x: 1, y: 0, z: 0, accent: 'cyan' },
       { x: 1, y: 1, z: 0, accent: 'cyan' },
       { x: 1, y: 1, z: 1, accent: 'amber' },
     ]);
-    // Rotate away from target by Y(+1) then X(+1)
     let initial = rotateVoxels(target, 'y', 1);
     initial = rotateVoxels(initial, 'x', 1);
     return {
       id: 'sp3d-7-7',
       age: 7,
+      stageNumber: 7,
       target,
       initial,
     };
   }
 
+  if (age === 7 && stageNumber === 12) {
+    const target: Voxel[] = normalizeVoxels([
+      { x: 0, y: 0, z: 0, accent: 'violet' },
+      { x: 1, y: 0, z: 0, accent: 'cyan' },
+      { x: 2, y: 0, z: 0, accent: 'cyan' },
+      { x: 2, y: 1, z: 0, accent: 'amber' },
+      { x: 0, y: 0, z: 1, accent: 'cyan' },
+    ]);
+    let initial = rotateVoxels(target, 'z', 1);
+    initial = rotateVoxels(initial, 'y', 1);
+    return {
+      id: 'sp3d-7-12',
+      age: 7,
+      stageNumber: 12,
+      target,
+      initial,
+    };
+  }
+
+  if (age === 7 && stageNumber === 17) {
+    const target: Voxel[] = normalizeVoxels([
+      { x: 0, y: 0, z: 0, accent: 'cyan' },
+      { x: 1, y: 0, z: 0, accent: 'mint' },
+      { x: 1, y: 1, z: 0, accent: 'cyan' },
+      { x: 1, y: 2, z: 0, accent: 'amber' },
+      { x: 1, y: 0, z: 1, accent: 'cyan' },
+      { x: 2, y: 0, z: 1, accent: 'violet' },
+    ]);
+    let initial = rotateVoxels(target, 'x', 1);
+    initial = rotateVoxels(initial, 'z', -1);
+    return {
+      id: 'sp3d-7-17',
+      age: 7,
+      stageNumber: 17,
+      target,
+      initial,
+    };
+  }
+
+  if (age === 9 && stageNumber === 7) {
+    const target: Voxel[] = normalizeVoxels([
+      { x: 0, y: 0, z: 0, accent: 'cyan' },
+      { x: 1, y: 0, z: 0, accent: 'cyan' },
+      { x: 1, y: 1, z: 0, accent: 'cyan' },
+      { x: 1, y: 1, z: 1, accent: 'amber' },
+      { x: 0, y: 0, z: 1, accent: 'cyan' },
+      { x: 0, y: 1, z: 1, accent: 'violet' },
+    ]);
+    let initial = rotateVoxels(target, 'x', 1);
+    initial = rotateVoxels(initial, 'y', 1);
+    initial = rotateVoxels(initial, 'z', 1);
+    return {
+      id: 'sp3d-9-7',
+      age: 9,
+      stageNumber: 7,
+      target,
+      initial,
+    };
+  }
+
+  if (age === 9 && stageNumber === 12) {
+    const target: Voxel[] = normalizeVoxels([
+      { x: 0, y: 0, z: 0, accent: 'amber' },
+      { x: 1, y: 0, z: 0, accent: 'cyan' },
+      { x: 1, y: 1, z: 0, accent: 'cyan' },
+      { x: 1, y: 1, z: 1, accent: 'mint' },
+      { x: 1, y: 2, z: 1, accent: 'cyan' },
+      { x: 2, y: 2, z: 1, accent: 'violet' },
+      { x: 0, y: 1, z: 0, accent: 'cyan' },
+    ]);
+    let initial = rotateVoxels(target, 'y', 1);
+    initial = rotateVoxels(initial, 'x', -1);
+    initial = rotateVoxels(initial, 'z', 1);
+    return {
+      id: 'sp3d-9-12',
+      age: 9,
+      stageNumber: 12,
+      target,
+      initial,
+    };
+  }
+
+  // Age 9, Stage 17: 8-Voxel Quad-Jewel Astral Crown
   const target: Voxel[] = normalizeVoxels([
-    { x: 0, y: 0, z: 0, accent: 'cyan' },
+    { x: 0, y: 0, z: 0, accent: 'violet' },
     { x: 1, y: 0, z: 0, accent: 'cyan' },
+    { x: 2, y: 0, z: 0, accent: 'amber' },
     { x: 1, y: 1, z: 0, accent: 'cyan' },
-    { x: 1, y: 1, z: 1, accent: 'amber' },
-    { x: 0, y: 0, z: 1, accent: 'cyan' },
-    { x: 0, y: 1, z: 1, accent: 'violet' },
+    { x: 1, y: 2, z: 0, accent: 'mint' },
+    { x: 0, y: 1, z: 1, accent: 'cyan' },
+    { x: 1, y: 1, z: 1, accent: 'cyan' },
+    { x: 2, y: 1, z: 1, accent: 'violet' },
   ]);
-  let initial = rotateVoxels(target, 'x', 1);
-  initial = rotateVoxels(initial, 'y', 1);
-  initial = rotateVoxels(initial, 'z', 1);
+  let initial = rotateVoxels(target, 'z', 1);
+  initial = rotateVoxels(initial, 'x', 1);
+  initial = rotateVoxels(initial, 'y', -1);
   return {
-    id: 'sp3d-9-7',
+    id: 'sp3d-9-17',
     age: 9,
+    stageNumber: 17,
     target,
     initial,
   };

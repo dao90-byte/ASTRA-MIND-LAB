@@ -1,6 +1,15 @@
 import { AgeGroup } from './types';
 
-export type InhibitoryTileKind = 'floor' | 'void' | 'goal' | 'fragile' | 'switch' | 'gate' | 'phase_gate';
+export type InhibitoryTileKind =
+  | 'floor'
+  | 'void'
+  | 'goal'
+  | 'fragile'
+  | 'switch'
+  | 'gate'
+  | 'phase_gate'
+  | 'warp'
+  | 'ice';
 
 export interface Coord {
   r: number;
@@ -11,6 +20,11 @@ export interface SwitchLink {
   r: number;
   c: number;
   targets: Coord[]; // gate coordinates toggled when stepped on
+}
+
+export interface WarpLink {
+  from: Coord;
+  to: Coord;
 }
 
 export interface PhaseGateDef {
@@ -25,10 +39,12 @@ export interface SentinelDef {
   orbit: Coord[]; // looping or ping-pong path array
 }
 
+export type InhibitoryStageNumber = 2 | 6 | 10 | 15;
+
 export interface InhibitoryStageSpec {
   id: string;
   age: AgeGroup;
-  stageNumber: 2 | 6;
+  stageNumber: InhibitoryStageNumber;
   rows: number;
   cols: number;
   start: Coord;
@@ -38,6 +54,7 @@ export interface InhibitoryStageSpec {
   tiles: InhibitoryTileKind[][];
   initialGatesOpen: Record<string, boolean>; // key: "r,c"
   switches: SwitchLink[];
+  warpLinks?: WarpLink[];
   phaseGates: PhaseGateDef[];
   sentinels: SentinelDef[];
 }
@@ -111,12 +128,15 @@ export function stepInhibitory(
 ): InhibitoryState {
   if (state.status !== 'playing') return state;
 
-  let nr = state.player.r;
-  let nc = state.player.c;
-  if (action === 'up') nr -= 1;
-  if (action === 'down') nr += 1;
-  if (action === 'left') nc -= 1;
-  if (action === 'right') nc += 1;
+  let dr = 0;
+  let dc = 0;
+  if (action === 'up') dr = -1;
+  if (action === 'down') dr = 1;
+  if (action === 'left') dc = -1;
+  if (action === 'right') dc = 1;
+
+  let nr = state.player.r + dr;
+  let nc = state.player.c + dc;
 
   if (action === 'wait' && !spec.allowWait) return state;
 
@@ -140,25 +160,41 @@ export function stepInhibitory(
   const nextBroken = { ...state.brokenTiles };
   const nextCracked = { ...state.crackedTiles };
 
-  // Fragile tile left behind breaks or cracks
+  // Fragile tile left behind breaks
   if (action !== 'wait') {
     const prevKey = keyOf(state.player.r, state.player.c);
     if (spec.tiles[state.player.r][state.player.c] === 'fragile') {
-      if (nextCracked[prevKey]) {
-        nextBroken[prevKey] = true;
-      } else {
-        nextBroken[prevKey] = true; // 1-step crystal bridge shatters after leaving
-      }
+      nextBroken[prevKey] = true;
     }
-  }
 
-  // Trigger switch on landing
-  if (action !== 'wait') {
+    // Frictionless ice crystal sliding: keep sliding while on 'ice' if next tile is passable
+    let safety = 0;
+    while (spec.tiles[nr][nc] === 'ice' && safety < 16) {
+      safety++;
+      const sr = nr + dr;
+      const sc = nc + dc;
+      if (!isTilePassableAtTurn(spec, state, sr, sc, nextTurn)) {
+        break;
+      }
+      nr = sr;
+      nc = sc;
+    }
+
+    // Trigger switch on landing
     const sw = spec.switches.find((s) => s.r === nr && s.c === nc);
     if (sw) {
       for (const tgt of sw.targets) {
         const tk = keyOf(tgt.r, tgt.c);
         nextGates[tk] = !nextGates[tk];
+      }
+    }
+
+    // Trigger paired crystal warp teleporter on landing
+    if (spec.tiles[nr][nc] === 'warp' && spec.warpLinks) {
+      const link = spec.warpLinks.find((w) => w.from.r === nr && w.from.c === nc);
+      if (link) {
+        nr = link.to.r;
+        nc = link.to.c;
       }
     }
   }
@@ -246,9 +282,11 @@ function makeFloor(rows: number, cols: number): InhibitoryTileKind[][] {
   );
 }
 
-export function getInhibitoryStage(age: AgeGroup, stageNumber: 2 | 6): InhibitoryStageSpec {
+export function getInhibitoryStage(
+  age: AgeGroup,
+  stageNumber: InhibitoryStageNumber
+): InhibitoryStageSpec {
   if (age === 7 && stageNumber === 2) {
-    // 5x5 Linked Switch Trap: rushing up col 0 hits SwitchB (2,0) which closes GateB (2,3) 5 steps later!
     const tiles = makeFloor(5, 5);
     tiles[0][3] = 'void';
     tiles[1][3] = 'void';
@@ -284,7 +322,6 @@ export function getInhibitoryStage(age: AgeGroup, stageNumber: 2 | 6): Inhibitor
   }
 
   if (age === 7 && stageNumber === 6) {
-    // 5x5 Sentinel + Wait + Phase Gate
     const tiles = makeFloor(5, 5);
     tiles[1][0] = 'void';
     tiles[1][1] = 'void';
@@ -324,8 +361,82 @@ export function getInhibitoryStage(age: AgeGroup, stageNumber: 2 | 6): Inhibitor
     };
   }
 
+  if (age === 7 && stageNumber === 10) {
+    // Crystal Warp Pad & Remote Gate Unlock: warping immediately traps player behind locked gate!
+    const tiles = makeFloor(5, 5);
+    tiles[0][3] = 'void';
+    tiles[1][2] = 'void';
+    tiles[2][2] = 'void';
+    tiles[2][3] = 'void';
+    tiles[2][4] = 'void';
+    tiles[3][3] = 'void';
+    tiles[4][3] = 'void';
+    tiles[3][0] = 'warp';
+    tiles[1][3] = 'floor';
+    tiles[1][4] = 'gate';
+    tiles[0][4] = 'goal';
+    tiles[4][2] = 'switch';
+    return {
+      id: 'inh-7-10',
+      age: 7,
+      stageNumber: 10,
+      rows: 5,
+      cols: 5,
+      start: { r: 4, c: 0 },
+      goal: { r: 0, c: 4 },
+      maxMoves: 10,
+      allowWait: false,
+      tiles,
+      initialGatesOpen: { '1,4': false },
+      switches: [{ r: 4, c: 2, targets: [{ r: 1, c: 4 }] }],
+      warpLinks: [{ from: { r: 3, c: 0 }, to: { r: 1, c: 3 } }],
+      phaseGates: [],
+      sentinels: [],
+    };
+  }
+
+  if (age === 7 && stageNumber === 15) {
+    // Frictionless Ice Crystal Corridor & Sentinel Wait Timing
+    const tiles = makeFloor(5, 5);
+    tiles[4][0] = 'void';
+    tiles[3][0] = 'void';
+    tiles[2][0] = 'void';
+    tiles[3][2] = 'void';
+    tiles[2][2] = 'void';
+    tiles[3][1] = 'ice';
+    tiles[2][1] = 'ice';
+    tiles[0][2] = 'ice';
+    tiles[0][3] = 'ice';
+    tiles[0][4] = 'goal';
+    return {
+      id: 'inh-7-15',
+      age: 7,
+      stageNumber: 15,
+      rows: 5,
+      cols: 5,
+      start: { r: 4, c: 1 },
+      goal: { r: 0, c: 4 },
+      maxMoves: 9,
+      allowWait: true,
+      tiles,
+      initialGatesOpen: {},
+      switches: [],
+      phaseGates: [],
+      sentinels: [
+        {
+          id: 's1',
+          orbit: [
+            { r: 1, c: 2 },
+            { r: 1, c: 1 },
+            { r: 1, c: 2 },
+            { r: 1, c: 3 },
+          ],
+        },
+      ],
+    };
+  }
+
   if (age === 9 && stageNumber === 2) {
-    // 6x6 Double-Linked Switch Sequencing
     const tiles = makeFloor(6, 6);
     tiles[0][3] = 'void';
     tiles[1][3] = 'void';
@@ -363,50 +474,142 @@ export function getInhibitoryStage(age: AgeGroup, stageNumber: 2 | 6): Inhibitor
     };
   }
 
-  // Age 9, Stage 6: Twin Sentinels + Fragile Nexus + Phase Gate
+  if (age === 9 && stageNumber === 6) {
+    const tiles = makeFloor(6, 6);
+    tiles[2][0] = 'void';
+    tiles[2][1] = 'void';
+    tiles[2][3] = 'void';
+    tiles[2][5] = 'void';
+    tiles[4][3] = 'void';
+    tiles[4][4] = 'void';
+    tiles[4][5] = 'void';
+    tiles[0][4] = 'void';
+    tiles[2][2] = 'fragile';
+    tiles[1][5] = 'phase_gate';
+    tiles[0][5] = 'goal';
+    return {
+      id: 'inh-9-6',
+      age: 9,
+      stageNumber: 6,
+      rows: 6,
+      cols: 6,
+      start: { r: 5, c: 0 },
+      goal: { r: 0, c: 5 },
+      maxMoves: 13,
+      allowWait: true,
+      tiles,
+      initialGatesOpen: {},
+      switches: [],
+      phaseGates: [{ r: 1, c: 5, period: 2, openMod: 0 }],
+      sentinels: [
+        {
+          id: 's1',
+          orbit: [
+            { r: 3, c: 2 },
+            { r: 3, c: 3 },
+            { r: 3, c: 2 },
+            { r: 3, c: 1 },
+          ],
+        },
+        {
+          id: 's2',
+          orbit: [
+            { r: 1, c: 4 },
+            { r: 2, c: 4 },
+            { r: 3, c: 4 },
+            { r: 2, c: 4 },
+          ],
+        },
+      ],
+    };
+  }
+
+  if (age === 9 && stageNumber === 10) {
+    // Dual-Switch Warp Labyrinth: must pre-toggle SwitchPre (5,2) before SwitchTrap (4,0) to enter Warp (2,3) -> (2,5)
+    const tiles = makeFloor(6, 6);
+    tiles[0][4] = 'void';
+    tiles[1][4] = 'void';
+    tiles[2][4] = 'void';
+    tiles[3][4] = 'void';
+    tiles[3][5] = 'void';
+    tiles[4][3] = 'void';
+    tiles[1][3] = 'void';
+    tiles[2][2] = 'void';
+    tiles[5][2] = 'switch'; // SwitchPre -> toggles GateA (3,3)
+    tiles[4][0] = 'switch'; // SwitchTrap -> toggles GateA (3,3) AND GateB (1,5)
+    tiles[3][3] = 'gate';   // GateA (initially true)
+    tiles[2][3] = 'warp';   // Warps to (2,5)
+    tiles[1][5] = 'gate';   // GateB (initially false)
+    tiles[0][5] = 'goal';
+    return {
+      id: 'inh-9-10',
+      age: 9,
+      stageNumber: 10,
+      rows: 6,
+      cols: 6,
+      start: { r: 5, c: 0 },
+      goal: { r: 0, c: 5 },
+      maxMoves: 14,
+      allowWait: false,
+      tiles,
+      initialGatesOpen: {
+        '3,3': true,
+        '1,5': false,
+      },
+      switches: [
+        { r: 5, c: 2, targets: [{ r: 3, c: 3 }] },
+        { r: 4, c: 0, targets: [{ r: 3, c: 3 }, { r: 1, c: 5 }] },
+      ],
+      warpLinks: [{ from: { r: 2, c: 3 }, to: { r: 2, c: 5 } }],
+      phaseGates: [],
+      sentinels: [],
+    };
+  }
+
+  // Age 9, Stage 15: Frictionless Ice Slide + Twin Sentinels + Phase Gate
   const tiles = makeFloor(6, 6);
-  tiles[2][0] = 'void';
-  tiles[2][1] = 'void';
-  tiles[2][3] = 'void';
-  tiles[2][5] = 'void';
-  tiles[4][3] = 'void';
-  tiles[4][4] = 'void';
-  tiles[4][5] = 'void';
-  tiles[0][4] = 'void';
-  tiles[2][2] = 'fragile';
+  tiles[5][0] = 'void';
+  tiles[4][0] = 'void';
+  tiles[3][0] = 'void';
+  tiles[4][2] = 'void';
+  tiles[3][2] = 'void';
+  tiles[4][1] = 'ice';
+  tiles[3][1] = 'ice';
+  tiles[1][2] = 'ice';
+  tiles[1][3] = 'ice';
   tiles[1][5] = 'phase_gate';
   tiles[0][5] = 'goal';
   return {
-    id: 'inh-9-6',
+    id: 'inh-9-15',
     age: 9,
-    stageNumber: 6,
+    stageNumber: 15,
     rows: 6,
     cols: 6,
-    start: { r: 5, c: 0 },
+    start: { r: 5, c: 1 },
     goal: { r: 0, c: 5 },
-    maxMoves: 13,
+    maxMoves: 10,
     allowWait: true,
     tiles,
     initialGatesOpen: {},
     switches: [],
-    phaseGates: [{ r: 1, c: 5, period: 2, openMod: 0 }],
+    phaseGates: [{ r: 1, c: 5, period: 2, openMod: 1 }],
     sentinels: [
       {
         id: 's1',
         orbit: [
-          { r: 3, c: 2 },
-          { r: 3, c: 3 },
-          { r: 3, c: 2 },
-          { r: 3, c: 1 },
+          { r: 2, c: 2 },
+          { r: 2, c: 1 },
+          { r: 2, c: 2 },
+          { r: 2, c: 3 },
         ],
       },
       {
         id: 's2',
         orbit: [
+          { r: 2, c: 4 },
           { r: 1, c: 4 },
-          { r: 2, c: 4 },
-          { r: 3, c: 4 },
-          { r: 2, c: 4 },
+          { r: 0, c: 4 },
+          { r: 1, c: 4 },
         ],
       },
     ],

@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { Check, Hand, RotateCcw, RotateCw } from 'lucide-react';
 import {
   Axis3D,
+  Spatial3DStageNumber,
   Voxel,
   getSpatial3DStage,
   rotateVoxels,
@@ -53,7 +54,7 @@ function computeCenteredPositions(voxels: Voxel[]) {
 }
 
 function getOklchVoxelPalette(accent: Voxel['accent'], matched: boolean) {
-  if (matched) {
+  if (matched || accent === 'mint') {
     return {
       shell: colorFromOklch(0.62, 0.22, 158),
       core: colorFromOklch(0.95, 0.14, 152),
@@ -140,14 +141,16 @@ function populateCrystalGroup(
 
 export function Spatial3DBoard({
   age,
+  stageNumber = 7,
   resetSignal,
   onWin,
 }: {
   age: AgeGroup;
+  stageNumber?: Spatial3DStageNumber;
   resetSignal: number;
   onWin: () => void;
 }) {
-  const spec = useMemo(() => getSpatial3DStage(age), [age]);
+  const spec = useMemo(() => getSpatial3DStage(age, stageNumber), [age, stageNumber]);
   const [voxels, setVoxels] = useState<Voxel[]>(() => spec.initial);
   const [won, setWon] = useState(false);
   const [webglFailed, setWebglFailed] = useState(false);

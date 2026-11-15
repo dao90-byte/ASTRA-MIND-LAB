@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { Eye, EyeOff, RotateCcw } from 'lucide-react';
 import {
   MazeCoord,
+  MemoryStageNumber,
   getMemoryMazeStage,
   isAdjacentCoord,
   isSafeMazeCell,
@@ -13,14 +14,16 @@ import { AgeGroup } from '../game/types';
 
 export function MemoryMazeBoard({
   age,
+  stageNumber = 3,
   resetSignal,
   onWin,
 }: {
   age: AgeGroup;
+  stageNumber?: MemoryStageNumber;
   resetSignal: number;
   onWin: () => void;
 }) {
-  const spec = useMemo(() => getMemoryMazeStage(age), [age]);
+  const spec = useMemo(() => getMemoryMazeStage(age, stageNumber), [age, stageNumber]);
   const [phase, setPhase] = useState<'observe' | 'recall' | 'won'>('observe');
   const [tracedPath, setTracedPath] = useState<MazeCoord[]>([spec.start]);
   const [errorCell, setErrorCell] = useState<MazeCoord | null>(null);
@@ -153,7 +156,12 @@ export function MemoryMazeBoard({
         <div
           className="relative p-3 rounded-2xl cosmo-panel border border-[#B378FF]/45"
           style={{
-            width: spec.cols === 4 ? 'min(76vw, 420px)' : 'min(82vw, 460px)',
+            width:
+              spec.cols === 4
+                ? 'min(76vw, 420px)'
+                : spec.cols === 5
+                ? 'min(80vw, 456px)'
+                : 'min(84vw, 480px)',
             aspectRatio: `${spec.cols} / ${spec.rows}`,
           }}
           data-testid="memory-grid"
@@ -226,6 +234,12 @@ export function MemoryMazeBoard({
                 const isStart = spec.start.r === r && spec.start.c === c;
                 const isGoal = spec.goal.r === r && spec.goal.c === c;
                 const isSafe = isSafeMazeCell(spec, { r, c });
+                const isDecoy = Boolean(
+                  spec.decoyCells?.some((d) => d.r === r && d.c === c)
+                );
+                const isWaypoint = Boolean(
+                  spec.waypoints?.some((w) => w.r === r && w.c === c)
+                );
                 const isTraced = tracedPath.some((p) => p.r === r && p.c === c);
                 const isHead = head.r === r && head.c === c;
                 const isError = errorCell?.r === r && errorCell?.c === c;
@@ -251,11 +265,19 @@ export function MemoryMazeBoard({
                         ? 'bg-[#0C2E4F] border-[#22EBFF] shadow-[0_0_24px_oklch(0.87_0.16_196_/_0.4)]'
                         : phase === 'observe' && isSafe
                         ? 'bg-[#1D154D] border-[#B378FF] shadow-[0_0_22px_oklch(0.75_0.21_294_/_0.38)]'
+                        : phase === 'observe' && isDecoy
+                        ? 'bg-[#2B1730] border-[#FFD23F]/65'
                         : canClick
                         ? 'bg-[#121C52] border-[#22EBFF]/55 hover:border-[#22EBFF] hover:bg-[#19286E] cursor-pointer'
                         : 'bg-[#090D2B] border-[#222B5E]'
                     }`}
                   >
+                    {isWaypoint && (phase === 'observe' || isTraced) && (
+                      <span
+                        className="absolute w-6 h-6 rotate-45 border border-[#FFD23F]/80 pointer-events-none"
+                        aria-hidden="true"
+                      />
+                    )}
                     <span
                       className={`rotate-45 transition-all ${
                         isHead
@@ -264,6 +286,8 @@ export function MemoryMazeBoard({
                           ? 'w-4 h-4 border-2 border-[#2DF59A] bg-[#2DF59A]/45'
                           : showGlow
                           ? 'w-3 h-3 bg-[#E5BDFF] shadow-[0_0_12px_oklch(0.75_0.21_294_/_0.8)]'
+                          : phase === 'observe' && isDecoy
+                          ? 'w-2.5 h-2.5 border border-[#FFD23F] bg-[#FFD23F]/35'
                           : canClick
                           ? 'w-2.5 h-2.5 bg-[#22EBFF]/60'
                           : 'w-2 h-2 bg-[#3A437D]'

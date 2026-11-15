@@ -104,8 +104,9 @@ export function TitleScreen({
                       const st = i + 1;
                       const earned = ageData.earnedMedals.includes(st as never);
                       const unlocked = st <= ageData.highestUnlocked;
-                      const startAngle = -90 + i * 45 + 6;
-                      const endAngle = startAngle + 33;
+                      const stepDeg = 360 / TOTAL_STAGES;
+                      const startAngle = -90 + i * stepDeg + 2.5;
+                      const endAngle = startAngle + stepDeg - 5;
                       const rad1 = (startAngle * Math.PI) / 180;
                       const rad2 = (endAngle * Math.PI) / 180;
                       const r = 32;
@@ -121,7 +122,7 @@ export function TitleScreen({
                           x2={x2.toFixed(1)}
                           y2={y2.toFixed(1)}
                           stroke={earned ? '#FFD23F' : unlocked ? accentStroke : '#2C346B'}
-                          strokeWidth={earned || active ? '2.6' : '1.8'}
+                          strokeWidth={earned || active ? '2.4' : '1.6'}
                           strokeLinecap="round"
                           strokeOpacity={earned ? 1 : unlocked ? 0.92 : 0.7}
                         />

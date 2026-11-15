@@ -149,6 +149,73 @@ export function CosmicMedalEmblem({
           <path d="M32 10V20M32 44V54M10 32H20M44 32H54M17 17L24 24M40 40L47 47M47 17L40 24M24 40L17 47" stroke={stroke} strokeWidth="2.2" />
         </g>
       )}
+      {shape === 'spire' && (
+        <g>
+          <polygon points="32,10 42,32 32,54 22,32" stroke={stroke} strokeWidth="2.2" fill={fill} />
+          <polygon points="32,20 36,32 32,44 28,32" fill={core} stroke="#FFFFFF" strokeWidth="1.2" />
+        </g>
+      )}
+      {shape === 'quasar' && (
+        <g>
+          <polygon points="32,14 50,32 32,50 14,32" stroke={stroke} strokeWidth="2" fill={fill} />
+          <line x1="12" y1="12" x2="52" y2="52" stroke={stroke} strokeWidth="2" />
+          <line x1="52" y1="12" x2="12" y2="52" stroke={stroke} strokeWidth="2" />
+          <polygon points="32,25 39,32 32,39 25,32" fill={core} stroke="#FFFFFF" strokeWidth="1.4" />
+        </g>
+      )}
+      {shape === 'vortex' && (
+        <g>
+          <polygon points="32,12 49,22 49,42 32,52 15,42 15,22" stroke={stroke} strokeWidth="1.8" strokeDasharray="4 3" />
+          <polygon points="32,18 45,32 32,46 19,32" stroke={stroke} strokeWidth="2.2" fill={fill} />
+          <polygon points="32,26 38,32 32,38 26,32" fill={core} />
+        </g>
+      )}
+      {shape === 'helix' && (
+        <g>
+          <polygon points="22,16 42,16 32,32" stroke={stroke} strokeWidth="2" fill={fill} />
+          <polygon points="32,32 42,48 22,48" stroke={stroke} strokeWidth="2" fill={core} />
+          <polygon points="32,27 36,32 32,37 28,32" fill="#FFFFFF" />
+        </g>
+      )}
+      {shape === 'monolith' && (
+        <g>
+          <polygon points="32,11 44,19 44,45 32,53 20,45 20,19" stroke={stroke} strokeWidth="2.2" fill={fill} />
+          <line x1="32" y1="11" x2="32" y2="53" stroke="#FFFFFF" strokeWidth="1.5" />
+          <polygon points="32,24 39,32 32,40 25,32" fill={core} />
+        </g>
+      )}
+      {shape === 'eclipse' && (
+        <g>
+          <polygon points="32,13 48,24 44,45 20,45 16,24" stroke={stroke} strokeWidth="2" fill={fill} />
+          <polygon points="32,22 41,32 32,42 23,32" fill={core} stroke="#FFFFFF" strokeWidth="1.3" />
+        </g>
+      )}
+      {shape === 'hypercube' && (
+        <g>
+          <polygon points="32,11 51,32 32,53 13,32" stroke={stroke} strokeWidth="2" fill={fill} />
+          <rect x="23" y="23" width="18" height="18" stroke="#FFFFFF" strokeWidth="1.5" fill={core} />
+        </g>
+      )}
+      {shape === 'pulsar' && (
+        <g>
+          <path d="M14 32L26 26L32 14L38 26L50 32L38 38L32 50L26 38Z" stroke={stroke} strokeWidth="2" fill={fill} />
+          <polygon points="32,26 38,32 32,38 26,32" fill={core} stroke="#FFFFFF" strokeWidth="1.2" />
+        </g>
+      )}
+      {shape === 'zenith' && (
+        <g>
+          <polygon points="32,12 49,38 15,38" stroke={stroke} strokeWidth="2" fill={fill} />
+          <polygon points="32,52 49,26 15,26" stroke={stroke} strokeWidth="2" fill={fill} />
+          <polygon points="32,26 38,32 32,38 26,32" fill={core} stroke="#FFFFFF" strokeWidth="1.2" />
+        </g>
+      )}
+      {shape === 'infinity' && (
+        <g>
+          <polygon points="21,22 32,32 21,42 12,32" stroke={stroke} strokeWidth="2.2" fill={core} />
+          <polygon points="43,22 52,32 43,42 32,32" stroke={stroke} strokeWidth="2.2" fill={core} />
+          <polygon points="32,28 36,32 32,36 28,32" fill="#FFFFFF" />
+        </g>
+      )}
     </svg>
   );
 }
@@ -173,7 +240,7 @@ export function MedalVaultModal({
         <Dialog.Overlay className="fixed inset-0 z-50 bg-[#040614]/88" />
         <Dialog.Content
           aria-label={`Age ${age} Medal Vault`}
-          className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] max-w-xl rounded-2xl cosmo-panel border border-[#FFD23F]/50 p-6 focus:outline-none"
+          className="fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 w-[calc(100vw-2rem)] max-w-3xl max-h-[88dvh] overflow-y-auto rounded-2xl cosmo-panel border border-[#FFD23F]/50 p-6 focus:outline-none"
         >
           <VisuallyHidden.Root>
             <Dialog.Title>Age {age} Medal Vault</Dialog.Title>
@@ -182,7 +249,7 @@ export function MedalVaultModal({
             </Dialog.Description>
           </VisuallyHidden.Root>
 
-          <div className="flex items-center justify-between mb-5 pb-4 border-b border-indigo-300/20">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-indigo-300/20">
             <div className="flex items-center gap-3.5">
               <span
                 className={`inline-flex items-center justify-center w-11 h-11 rounded-xl border text-xl font-extrabold tabular-nums ${
@@ -210,7 +277,7 @@ export function MedalVaultModal({
             </Dialog.Close>
           </div>
 
-          <div className="grid grid-cols-4 gap-3">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
             {STAGE_DESCRIPTORS.map((desc) => {
               const earned = earnedMedals.includes(desc.stage);
               return (
@@ -220,11 +287,11 @@ export function MedalVaultModal({
                     earned
                       ? {
                           borderColor: `${desc.accentHex}99`,
-                          boxShadow: `0 0 24px ${desc.accentHex}2A`,
+                          boxShadow: `0 0 22px ${desc.accentHex}2A`,
                         }
                       : undefined
                   }
-                  className={`flex flex-col items-center justify-center gap-2 p-3 rounded-xl border transition-transform ${
+                  className={`flex flex-col items-center justify-center gap-1.5 p-2.5 rounded-xl border transition-transform ${
                     earned
                       ? 'bg-[#101746]'
                       : 'bg-[#080C26] border-[#1F2758] opacity-55'
@@ -234,7 +301,7 @@ export function MedalVaultModal({
                     shape={desc.medalShape}
                     accentHex={desc.accentHex}
                     earned={earned}
-                    size={62}
+                    size={50}
                   />
                   <span className="text-xs font-extrabold tabular-nums text-indigo-100">
                     {desc.stage}

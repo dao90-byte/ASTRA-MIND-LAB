@@ -23,14 +23,27 @@ interface GalaxyMapProps {
 }
 
 const NODE_POSITIONS: Array<{ x: number; y: number }> = [
-  { x: 9, y: 66 },
-  { x: 21, y: 31 },
-  { x: 34, y: 69 },
-  { x: 47, y: 29 },
-  { x: 60, y: 67 },
-  { x: 73, y: 31 },
-  { x: 85, y: 65 },
-  { x: 92, y: 29 },
+  // Row 1: Stages 1..6 (Left -> Right)
+  { x: 9, y: 20 },
+  { x: 25, y: 14 },
+  { x: 41, y: 21 },
+  { x: 58, y: 14 },
+  { x: 74, y: 21 },
+  { x: 90, y: 15 },
+  // Row 2: Stages 7..12 (Right -> Left)
+  { x: 90, y: 49 },
+  { x: 74, y: 55 },
+  { x: 58, y: 48 },
+  { x: 41, y: 55 },
+  { x: 25, y: 48 },
+  { x: 9, y: 54 },
+  // Row 3: Stages 13..18 (Left -> Right)
+  { x: 9, y: 82 },
+  { x: 25, y: 87 },
+  { x: 41, y: 80 },
+  { x: 58, y: 87 },
+  { x: 74, y: 80 },
+  { x: 90, y: 85 },
 ];
 
 export function GalaxyMap({
@@ -56,7 +69,7 @@ export function GalaxyMap({
   }, []);
 
   return (
-    <div className="relative z-10 h-full w-full flex flex-col justify-between p-5 md:p-8">
+    <div className="relative z-10 h-full w-full flex flex-col justify-between p-4 md:p-7">
       {/* Crisp Header Instruments */}
       <div className="flex items-center justify-between gap-4">
         <button
@@ -142,10 +155,10 @@ export function GalaxyMap({
         </div>
       </div>
 
-      {/* Sharp Crystalline Refraction Constellation Map */}
-      <div className="relative flex-1 flex items-center justify-center my-2">
+      {/* Sharp Crystalline Refraction Constellation Map (18 Stages) */}
+      <div className="relative flex-1 flex items-center justify-center my-1 min-h-0">
         {isDesktop ? (
-          <div className="relative w-full max-w-6xl h-[470px]">
+          <div className="relative w-full max-w-6xl h-[495px]">
             <svg
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
@@ -163,7 +176,7 @@ export function GalaxyMap({
               </defs>
 
               <polygon
-                points="50,6 84,18 96,50 84,82 50,94 16,82 4,50 16,18"
+                points="50,4 94,12 97,50 94,88 50,96 6,88 3,50 6,12"
                 fill="none"
                 stroke="#4F5A9E"
                 strokeOpacity="0.28"
@@ -176,8 +189,11 @@ export function GalaxyMap({
                 const stageNum = (idx + 2) as StageNumber;
                 const unlocked = isStageUnlocked(progress, selectedAge, stageNum);
                 const highlighted = hoveredStage !== null && stageNum <= hoveredStage && unlocked;
-                const mx = (pos.x + next.x) / 2;
-                const my = (pos.y + next.y) / 2 + (idx % 2 === 0 ? -11 : 11);
+                const isTurn = idx === 5 || idx === 11;
+                const mx = isTurn ? (idx === 5 ? 95.5 : 4.5) : (pos.x + next.x) / 2;
+                const my = isTurn
+                  ? (pos.y + next.y) / 2
+                  : (pos.y + next.y) / 2 + (idx % 2 === 0 ? -4 : 4);
                 const d = `M ${pos.x} ${pos.y} L ${mx} ${my} L ${next.x} ${next.y}`;
 
                 return (
@@ -188,7 +204,7 @@ export function GalaxyMap({
                         fill="none"
                         stroke="url(#auroraRainbow)"
                         strokeOpacity={highlighted ? 0.45 : 0.22}
-                        strokeWidth={highlighted ? '1.9' : '1.25'}
+                        strokeWidth={highlighted ? '1.7' : '1.15'}
                         strokeLinejoin="miter"
                       />
                     )}
@@ -197,7 +213,7 @@ export function GalaxyMap({
                       fill="none"
                       stroke={unlocked ? 'url(#auroraRainbow)' : '#353E75'}
                       strokeOpacity={highlighted ? 1 : unlocked ? 0.95 : 0.45}
-                      strokeWidth={highlighted ? '0.68' : unlocked ? '0.45' : '0.32'}
+                      strokeWidth={highlighted ? '0.62' : unlocked ? '0.42' : '0.3'}
                       strokeDasharray={unlocked ? undefined : '1 1.3'}
                       strokeLinejoin="miter"
                     />
@@ -207,7 +223,7 @@ export function GalaxyMap({
                         fill="none"
                         stroke="#FFFFFF"
                         strokeOpacity={highlighted ? 0.85 : 0.45}
-                        strokeWidth="0.16"
+                        strokeWidth="0.14"
                         strokeLinejoin="miter"
                       />
                     )}
@@ -217,7 +233,7 @@ export function GalaxyMap({
             </svg>
 
             {STAGE_DESCRIPTORS.map((desc, idx) => {
-              const pos = NODE_POSITIONS[idx];
+              const pos = NODE_POSITIONS[idx] ?? { x: 50, y: 50 };
               const unlocked = isStageUnlocked(progress, selectedAge, desc.stage);
               const earned = hasEarnedMedal(progress, selectedAge, desc.stage);
               const isCurrent = unlocked && !earned && desc.stage === ageProgress.highestUnlocked;
@@ -226,12 +242,12 @@ export function GalaxyMap({
                 <div
                   key={desc.stage}
                   style={{ left: `${pos.x}%`, top: `${pos.y}%` }}
-                  className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-2.5"
+                  className="absolute -translate-x-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5"
                 >
                   <div className="relative flex items-center justify-center">
                     {unlocked && (
                       <span
-                        className="absolute -inset-6 rounded-full pointer-events-none"
+                        className="absolute -inset-4 rounded-full pointer-events-none"
                         style={{
                           background: `radial-gradient(circle, ${earned ? 'rgba(255,210,63,0.32)' : `${desc.accentHex}38`} 0%, transparent 68%)`,
                         }}
@@ -240,7 +256,7 @@ export function GalaxyMap({
                     )}
                     {isCurrent && (
                       <span
-                        className="absolute -inset-3 rounded-xl border-2 rotate-45 animate-beacon-ring pointer-events-none"
+                        className="absolute -inset-2.5 rounded-xl border-2 rotate-45 animate-beacon-ring pointer-events-none"
                         style={{ borderColor: desc.accentHex }}
                         aria-hidden="true"
                       />
@@ -259,12 +275,12 @@ export function GalaxyMap({
                           ? {
                               borderColor: earned ? '#FFD23F' : desc.accentHex,
                               boxShadow: isCurrent
-                                ? `0 0 42px -2px ${desc.accentHex}99, 0 18px 36px -8px rgba(0,0,0,0.92), inset 0 1px 0 rgba(255,255,255,0.28)`
-                                : `0 0 28px -4px ${desc.accentHex}66, 0 14px 28px -8px rgba(0,0,0,0.88), inset 0 1px 0 rgba(255,255,255,0.2)`,
+                                ? `0 0 38px -2px ${desc.accentHex}99, 0 14px 28px -6px rgba(0,0,0,0.92), inset 0 1px 0 rgba(255,255,255,0.28)`
+                                : `0 0 24px -4px ${desc.accentHex}66, 0 12px 24px -6px rgba(0,0,0,0.88), inset 0 1px 0 rgba(255,255,255,0.2)`,
                             }
                           : undefined
                       }
-                      className={`relative w-21 h-21 rounded-xl flex items-center justify-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
+                      className={`relative w-16 h-16 rounded-xl flex items-center justify-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
                         !unlocked
                           ? 'bg-[#090D28]/92 border border-[#2C356E] text-indigo-300/45 cursor-not-allowed'
                           : earned
@@ -276,23 +292,23 @@ export function GalaxyMap({
                     >
                       {!unlocked && (
                         <span
-                          className="absolute inset-2.5 border border-indigo-400/15 rotate-45 pointer-events-none"
+                          className="absolute inset-2 border border-indigo-400/15 rotate-45 pointer-events-none"
                           aria-hidden="true"
                         />
                       )}
                       {!unlocked ? (
-                        <Lock className="w-5 h-5 opacity-75" />
+                        <Lock className="w-4.5 h-4.5 opacity-75" />
                       ) : earned ? (
                         <CosmicMedalEmblem
                           shape={desc.medalShape}
                           accentHex={desc.accentHex}
                           earned={true}
-                          size={68}
+                          size={50}
                         />
                       ) : (
                         <PillarIcon
                           pillar={desc.pillar}
-                          className="w-8.5 h-8.5"
+                          className="w-7 h-7"
                           color={desc.accentHex}
                         />
                       )}
@@ -300,7 +316,7 @@ export function GalaxyMap({
                   </div>
 
                   <span
-                    className={`tabular-nums text-xs font-extrabold tracking-tight px-2.5 py-0.5 rounded-md ${
+                    className={`tabular-nums text-[11px] font-extrabold tracking-tight px-2 py-0.5 rounded-md ${
                       earned
                         ? 'bg-[#211B45] text-[#FFD23F] border border-[#FFD23F]/60'
                         : unlocked
@@ -315,7 +331,7 @@ export function GalaxyMap({
             })}
           </div>
         ) : (
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 w-full max-w-md">
+          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5 w-full max-w-xl">
             {STAGE_DESCRIPTORS.map((desc) => {
               const unlocked = isStageUnlocked(progress, selectedAge, desc.stage);
               const earned = hasEarnedMedal(progress, selectedAge, desc.stage);
@@ -332,27 +348,27 @@ export function GalaxyMap({
                       ? { borderColor: earned ? '#FFD23F' : desc.accentHex }
                       : undefined
                   }
-                  className={`h-24 rounded-2xl flex flex-col items-center justify-center gap-1.5 border transition-all cosmo-tile ${
+                  className={`h-20 rounded-xl flex flex-col items-center justify-center gap-1 border transition-all cosmo-tile ${
                     !unlocked
                       ? 'bg-[#090D26]/92 border-[#252C5C] text-indigo-400/45 cursor-not-allowed'
                       : isCurrent
-                      ? 'bg-[#141E54] cursor-pointer shadow-[0_0_28px_oklch(0.87_0.16_196_/_0.4)]'
+                      ? 'bg-[#141E54] cursor-pointer shadow-[0_0_24px_oklch(0.87_0.16_196_/_0.4)]'
                       : 'bg-[#0E143B] cursor-pointer'
                   }`}
                 >
                   {!unlocked ? (
-                    <Lock className="w-5 h-5" />
+                    <Lock className="w-4 h-4" />
                   ) : earned ? (
                     <CosmicMedalEmblem
                       shape={desc.medalShape}
                       accentHex={desc.accentHex}
                       earned={true}
-                      size={44}
+                      size={36}
                     />
                   ) : (
-                    <PillarIcon pillar={desc.pillar} className="w-6 h-6" color={desc.accentHex} />
+                    <PillarIcon pillar={desc.pillar} className="w-5 h-5" color={desc.accentHex} />
                   )}
-                  <span className="tabular-nums text-xs font-extrabold text-white">{desc.stage}</span>
+                  <span className="tabular-nums text-[11px] font-extrabold text-white">{desc.stage}</span>
                 </button>
               );
             })}

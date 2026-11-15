@@ -1,6 +1,24 @@
 export type AgeGroup = 7 | 9;
 
-export type StageNumber = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8;
+export type StageNumber =
+  | 1
+  | 2
+  | 3
+  | 4
+  | 5
+  | 6
+  | 7
+  | 8
+  | 9
+  | 10
+  | 11
+  | 12
+  | 13
+  | 14
+  | 15
+  | 16
+  | 17
+  | 18;
 
 export type CognitivePillar =
   | 'system'
@@ -19,7 +37,17 @@ export type MedalShape =
   | 'astrolabe'
   | 'nexus'
   | 'tesseract'
-  | 'nova';
+  | 'nova'
+  | 'spire'
+  | 'quasar'
+  | 'vortex'
+  | 'helix'
+  | 'monolith'
+  | 'eclipse'
+  | 'hypercube'
+  | 'pulsar'
+  | 'zenith'
+  | 'infinity';
 
 export interface StageDescriptor {
   stage: StageNumber;

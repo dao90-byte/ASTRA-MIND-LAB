@@ -115,13 +115,13 @@ export function VictoryModal({
             />
           </div>
 
-          <div className="flex items-center gap-2" aria-hidden="true">
+          <div className="flex flex-wrap items-center justify-center gap-1.5 max-w-[230px]" aria-hidden="true">
             {STAGE_DESCRIPTORS.map((d) => (
               <span
                 key={d.stage}
                 style={d.stage <= stage ? { backgroundColor: d.accentHex } : undefined}
                 className={`h-2 transition-all rotate-45 ${
-                  d.stage <= stage ? 'w-2.5' : 'w-1.5 bg-[#242C60]'
+                  d.stage <= stage ? 'w-2' : 'w-1.5 bg-[#242C60]'
                 }`}
               />
             ))}

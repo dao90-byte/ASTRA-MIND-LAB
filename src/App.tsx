@@ -266,7 +266,7 @@ export default function App() {
 
           {/* Active Stage Board */}
           <div className="flex-1 min-h-0 w-full flex items-center justify-center">
-            {(activeStage === 1 || activeStage === 5) && (
+            {(activeStage === 1 || activeStage === 5 || activeStage === 9 || activeStage === 14) && (
               <SystemBoard
                 age={selectedAge}
                 stageNumber={activeStage}
@@ -274,7 +274,7 @@ export default function App() {
                 onWin={handleStageWin}
               />
             )}
-            {(activeStage === 2 || activeStage === 6) && (
+            {(activeStage === 2 || activeStage === 6 || activeStage === 10 || activeStage === 15) && (
               <InhibitoryBoard
                 age={selectedAge}
                 stageNumber={activeStage}
@@ -282,21 +282,23 @@ export default function App() {
                 onWin={handleStageWin}
               />
             )}
-            {activeStage === 3 && (
+            {(activeStage === 3 || activeStage === 11 || activeStage === 16) && (
               <MemoryMazeBoard
                 age={selectedAge}
+                stageNumber={activeStage}
                 resetSignal={resetSignal}
                 onWin={handleStageWin}
               />
             )}
-            {activeStage === 7 && (
+            {(activeStage === 7 || activeStage === 12 || activeStage === 17) && (
               <Spatial3DBoard
                 age={selectedAge}
+                stageNumber={activeStage}
                 resetSignal={resetSignal}
                 onWin={handleStageWin}
               />
             )}
-            {(activeStage === 4 || activeStage === 8) && (
+            {(activeStage === 4 || activeStage === 8 || activeStage === 13 || activeStage === 18) && (
               <SandboxBoard
                 age={selectedAge}
                 stageNumber={activeStage}

@@ -1,6 +1,6 @@
 import { AgeGroup, AgeProgress, AllProgress, StageDescriptor, StageNumber } from './types';
 
-export const TOTAL_STAGES = 8;
+export const TOTAL_STAGES = 18;
 
 export const STAGE_DESCRIPTORS: StageDescriptor[] = [
   { stage: 1, pillar: 'system', medalShape: 'prism', accentHex: '#22EBFF' },
@@ -11,6 +11,16 @@ export const STAGE_DESCRIPTORS: StageDescriptor[] = [
   { stage: 6, pillar: 'inhibitory', medalShape: 'nexus', accentHex: '#FF8A3D' },
   { stage: 7, pillar: 'spatial3d', medalShape: 'tesseract', accentHex: '#C77DFF' },
   { stage: 8, pillar: 'sandbox', medalShape: 'nova', accentHex: '#38F2B0' },
+  { stage: 9, pillar: 'system', medalShape: 'spire', accentHex: '#22EBFF' },
+  { stage: 10, pillar: 'inhibitory', medalShape: 'quasar', accentHex: '#FFD23F' },
+  { stage: 11, pillar: 'memory', medalShape: 'vortex', accentHex: '#B378FF' },
+  { stage: 12, pillar: 'spatial3d', medalShape: 'helix', accentHex: '#FF4EC6' },
+  { stage: 13, pillar: 'sandbox', medalShape: 'monolith', accentHex: '#2DF59A' },
+  { stage: 14, pillar: 'system', medalShape: 'eclipse', accentHex: '#48F0FF' },
+  { stage: 15, pillar: 'inhibitory', medalShape: 'hypercube', accentHex: '#FF9E44' },
+  { stage: 16, pillar: 'memory', medalShape: 'pulsar', accentHex: '#D08BFF' },
+  { stage: 17, pillar: 'spatial3d', medalShape: 'zenith', accentHex: '#FF66D6' },
+  { stage: 18, pillar: 'sandbox', medalShape: 'infinity', accentHex: '#2DF59A' },
 ];
 
 export const STORAGE_KEY = 'astral_mind_lab_progress_v1';

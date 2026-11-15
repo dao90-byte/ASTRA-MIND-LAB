@@ -16,6 +16,7 @@ import {
   Undo2,
 } from 'lucide-react';
 import {
+  InhibitoryStageNumber,
   createInitialInhibitoryState,
   getInhibitoryStage,
   getSentinelPos,
@@ -35,7 +36,7 @@ export function InhibitoryBoard({
   onWin,
 }: {
   age: AgeGroup;
-  stageNumber: 2 | 6;
+  stageNumber: InhibitoryStageNumber;
   resetSignal: number;
   onWin: () => void;
 }) {
@@ -172,6 +173,19 @@ export function InhibitoryBoard({
                 );
               })
             )}
+            {spec.warpLinks?.map((wl, idx) => (
+              <line
+                key={`warp-link-${idx}`}
+                x1={wl.from.c * 100 + 50}
+                y1={wl.from.r * 100 + 50}
+                x2={wl.to.c * 100 + 50}
+                y2={wl.to.r * 100 + 50}
+                stroke="#B378FF"
+                strokeOpacity="0.72"
+                strokeWidth="3.2"
+                strokeDasharray="6 5"
+              />
+            ))}
             {spec.sentinels.map((s) => {
               const pts = s.orbit.map((o) => `${o.c * 100 + 50},${o.r * 100 + 50}`).join(' ');
               return (
@@ -221,6 +235,10 @@ export function InhibitoryBoard({
                   return pos.r === r && pos.c === c;
                 });
 
+                const isWarpDest = Boolean(
+                  spec.warpLinks?.some((wl) => wl.to.r === r && wl.to.c === c)
+                );
+
                 const gateOpen = tile === 'gate' ? Boolean(state.gatesOpen[k]) : false;
                 const pg = spec.phaseGates.find((p) => p.r === r && p.c === c);
                 const pgOpenNow = pg ? isPhaseGateOpen(pg, state.turn) : false;
@@ -249,6 +267,8 @@ export function InhibitoryBoard({
                         ? 'bg-[#0C2E4F] border-[#22EBFF] shadow-[0_0_26px_oklch(0.87_0.16_196_/_0.45)]'
                         : tile === 'goal'
                         ? 'bg-[#0D3030] border-[#2DF59A] shadow-[0_0_24px_oklch(0.86_0.19_158_/_0.38)]'
+                        : tile === 'ice'
+                        ? 'bg-[#0E2848] border-[#66F2FF]/70 hover:border-[#66F2FF]'
                         : isAdjacent && passableNext && state.status === 'playing'
                         ? 'bg-[#121C52] border-[#22EBFF]/70 hover:border-[#22EBFF] hover:bg-[#19286E] cursor-pointer'
                         : 'bg-[#0C1136] border-[#252D66]'
@@ -257,6 +277,13 @@ export function InhibitoryBoard({
                     {sentinelNext && !sentinelHere && (
                       <div
                         className="absolute inset-2 rounded-lg border border-dashed border-[#FF4EC6]/75 pointer-events-none"
+                        aria-hidden="true"
+                      />
+                    )}
+
+                    {isWarpDest && !isPlayer && (
+                      <div
+                        className="absolute inset-2 rotate-45 border border-dashed border-[#B378FF]/70 pointer-events-none"
                         aria-hidden="true"
                       />
                     )}
@@ -286,6 +313,20 @@ export function InhibitoryBoard({
 
                     {tile === 'switch' && !isPlayer && (
                       <div className="w-6 h-6 rotate-45 bg-[#FFD23F]/28 border-2 border-[#FFD23F] shadow-[0_0_14px_oklch(0.89_0.17_84_/_0.5)]" />
+                    )}
+
+                    {tile === 'warp' && !isPlayer && (
+                      <div className="relative w-7 h-7 rotate-45 border-2 border-[#B378FF] bg-[#B378FF]/25 flex items-center justify-center shadow-[0_0_18px_oklch(0.75_0.21_294_/_0.6)]">
+                        <div className="w-2.5 h-2.5 bg-[#FFFFFF]" />
+                      </div>
+                    )}
+
+                    {tile === 'ice' && !isPlayer && (
+                      <svg viewBox="0 0 32 32" className="w-6 h-6 text-[#88FAFF]" fill="none" aria-hidden="true">
+                        <polygon points="16,4 28,16 16,28 4,16" stroke="currentColor" strokeWidth="1.8" fill="rgba(136,250,255,0.18)" />
+                        <line x1="10" y1="16" x2="22" y2="16" stroke="#FFFFFF" strokeWidth="1.6" />
+                        <line x1="16" y1="10" x2="16" y2="22" stroke="#FFFFFF" strokeWidth="1.6" />
+                      </svg>
                     )}
 
                     {tile === 'fragile' && !isPlayer && (

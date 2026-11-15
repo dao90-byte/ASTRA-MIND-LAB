@@ -17,6 +17,7 @@ import {
   PlacedTool,
   SANDBOX_H,
   SANDBOX_W,
+  SandboxStageNumber,
   SandboxToolKind,
   createInitialOrb,
   getSandboxStage,
@@ -55,7 +56,7 @@ export function SandboxBoard({
   onWin,
 }: {
   age: AgeGroup;
-  stageNumber: 4 | 8;
+  stageNumber: SandboxStageNumber;
   resetSignal: number;
   onWin: () => void;
 }) {
@@ -169,16 +170,67 @@ export function SandboxBoard({
         ctx.stroke();
       }
 
-      if (spec.gravityY > 0) {
-        ctx.strokeStyle = 'rgba(34, 235, 255, 0.2)';
+      if (spec.gravityY !== 0) {
+        const isUp = spec.gravityY < 0;
+        ctx.strokeStyle = isUp ? 'rgba(255, 78, 198, 0.25)' : 'rgba(34, 235, 255, 0.2)';
         ctx.lineWidth = 1.8;
         for (let x = 140; x <= 680; x += 180) {
           const yOff = (t * 26) % 40;
+          const cy = isUp ? SANDBOX_H - 26 - yOff : 26 + yOff;
           ctx.beginPath();
-          ctx.moveTo(x - 6, 26 + yOff);
-          ctx.lineTo(x, 32 + yOff);
-          ctx.lineTo(x + 6, 26 + yOff);
+          ctx.moveTo(x - 6, cy);
+          ctx.lineTo(x, isUp ? cy - 6 : cy + 6);
+          ctx.lineTo(x + 6, cy);
           ctx.stroke();
+        }
+      }
+
+      // Render Paired Quantum Crystal Wormholes
+      if (spec.wormholes) {
+        for (const wh of spec.wormholes) {
+          ctx.save();
+          ctx.strokeStyle = 'rgba(179, 120, 255, 0.45)';
+          ctx.lineWidth = 2.2;
+          ctx.setLineDash([7, 7]);
+          ctx.beginPath();
+          ctx.moveTo(wh.inX, wh.inY);
+          ctx.lineTo(wh.outX, wh.outY);
+          ctx.stroke();
+          ctx.setLineDash([]);
+
+          const drawWormholeNode = (wx: number, wy: number, col: string, dir: number) => {
+            ctx.save();
+            ctx.translate(wx, wy);
+            ctx.rotate(t * 1.4 * dir);
+            ctx.fillStyle = 'rgba(18, 22, 68, 0.85)';
+            ctx.strokeStyle = col;
+            ctx.lineWidth = 2.4;
+            ctx.beginPath();
+            for (let s = 0; s < 8; s++) {
+              const ang = (s * Math.PI) / 4;
+              const px = Math.cos(ang) * wh.r;
+              const py = Math.sin(ang) * wh.r;
+              if (s === 0) ctx.moveTo(px, py);
+              else ctx.lineTo(px, py);
+            }
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+
+            ctx.fillStyle = col;
+            ctx.beginPath();
+            ctx.moveTo(0, -9);
+            ctx.lineTo(9, 0);
+            ctx.lineTo(0, 9);
+            ctx.lineTo(-9, 0);
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+          };
+
+          drawWormholeNode(wh.inX, wh.inY, '#FF4EC6', 1);
+          drawWormholeNode(wh.outX, wh.outY, '#B378FF', -1);
+          ctx.restore();
         }
       }
 
@@ -557,7 +609,14 @@ export function SandboxBoard({
     if (
       Math.hypot(x - spec.launcher.x, y - spec.launcher.y) < 48 ||
       Math.hypot(x - spec.portal.x, y - spec.portal.y) < 48 ||
-      spec.asteroids.some((a) => Math.hypot(x - a.x, y - a.y) < a.r + 22)
+      spec.asteroids.some((a) => Math.hypot(x - a.x, y - a.y) < a.r + 22) ||
+      Boolean(
+        spec.wormholes?.some(
+          (w) =>
+            Math.hypot(x - w.inX, y - w.inY) < w.r + 18 ||
+            Math.hypot(x - w.outX, y - w.outY) < w.r + 18
+        )
+      )
     ) {
       return;
     }
