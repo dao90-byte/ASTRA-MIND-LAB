@@ -5,7 +5,7 @@ export interface MazeCoord {
   c: number;
 }
 
-export type MemoryStageNumber = 3 | 11 | 16;
+export type MemoryStageNumber = 3 | 11 | 16 | 21 | 26;
 
 export interface MemoryMazeSpec {
   id: string;
@@ -29,7 +29,7 @@ export interface Voxel {
 }
 
 export type Axis3D = 'x' | 'y' | 'z';
-export type Spatial3DStageNumber = 7 | 12 | 17;
+export type Spatial3DStageNumber = 7 | 12 | 17 | 22 | 27;
 
 export interface Spatial3DSpec {
   id: string;
@@ -199,16 +199,195 @@ export function getMemoryMazeStage(
     };
   }
 
-  // Age 9, Stage 16: 6x6 Deep-Space Serpentine Nebula + Decoys
+  if (age === 9 && stageNumber === 16) {
+    // Age 9, Stage 16: 6x6 Deep-Space Serpentine Nebula + Decoys
+    return {
+      id: 'mem-9-16',
+      age: 9,
+      stageNumber: 16,
+      rows: 6,
+      cols: 6,
+      observeMs: 5200,
+      start: { r: 5, c: 0 },
+      goal: { r: 5, c: 2 },
+      safePath: [
+        { r: 5, c: 0 },
+        { r: 4, c: 0 },
+        { r: 3, c: 0 },
+        { r: 2, c: 0 },
+        { r: 1, c: 0 },
+        { r: 0, c: 0 },
+        { r: 0, c: 1 },
+        { r: 0, c: 2 },
+        { r: 0, c: 3 },
+        { r: 0, c: 4 },
+        { r: 0, c: 5 },
+        { r: 1, c: 5 },
+        { r: 2, c: 5 },
+        { r: 3, c: 5 },
+        { r: 3, c: 4 },
+        { r: 3, c: 3 },
+        { r: 3, c: 2 },
+        { r: 4, c: 2 },
+        { r: 5, c: 2 },
+      ],
+      decoyCells: [
+        { r: 2, c: 2 },
+        { r: 2, c: 3 },
+        { r: 4, c: 4 },
+        { r: 5, c: 4 },
+      ],
+      waypoints: [
+        { r: 0, c: 0 },
+        { r: 0, c: 5 },
+        { r: 3, c: 2 },
+      ],
+    };
+  }
+
+  if (age === 7 && stageNumber === 21) {
+    // Age 7, Stage 21: Inward Center Spiral Constellation
+    return {
+      id: 'mem-7-21',
+      age: 7,
+      stageNumber: 21,
+      rows: 5,
+      cols: 5,
+      observeMs: 4100,
+      start: { r: 4, c: 0 },
+      goal: { r: 2, c: 2 },
+      safePath: [
+        { r: 4, c: 0 },
+        { r: 4, c: 1 },
+        { r: 4, c: 2 },
+        { r: 4, c: 3 },
+        { r: 4, c: 4 },
+        { r: 3, c: 4 },
+        { r: 2, c: 4 },
+        { r: 1, c: 4 },
+        { r: 0, c: 4 },
+        { r: 0, c: 3 },
+        { r: 0, c: 2 },
+        { r: 1, c: 2 },
+        { r: 2, c: 2 },
+      ],
+      decoyCells: [
+        { r: 2, c: 0 },
+        { r: 0, c: 0 },
+        { r: 3, c: 1 },
+        { r: 2, c: 3 },
+      ],
+      waypoints: [
+        { r: 4, c: 4 },
+        { r: 0, c: 4 },
+        { r: 0, c: 2 },
+      ],
+    };
+  }
+
+  if (age === 7 && stageNumber === 26) {
+    // Age 7, Stage 26: 5x5 Twin-Wave S-Zigzag Constellation
+    return {
+      id: 'mem-7-26',
+      age: 7,
+      stageNumber: 26,
+      rows: 5,
+      cols: 5,
+      observeMs: 3900,
+      start: { r: 4, c: 0 },
+      goal: { r: 0, c: 4 },
+      safePath: [
+        { r: 4, c: 0 },
+        { r: 3, c: 0 },
+        { r: 2, c: 0 },
+        { r: 1, c: 0 },
+        { r: 0, c: 0 },
+        { r: 0, c: 1 },
+        { r: 0, c: 2 },
+        { r: 1, c: 2 },
+        { r: 2, c: 2 },
+        { r: 3, c: 2 },
+        { r: 4, c: 2 },
+        { r: 4, c: 3 },
+        { r: 4, c: 4 },
+        { r: 3, c: 4 },
+        { r: 2, c: 4 },
+        { r: 1, c: 4 },
+        { r: 0, c: 4 },
+      ],
+      decoyCells: [
+        { r: 2, c: 1 },
+        { r: 4, c: 1 },
+        { r: 0, c: 3 },
+        { r: 2, c: 3 },
+      ],
+      waypoints: [
+        { r: 0, c: 0 },
+        { r: 2, c: 2 },
+        { r: 4, c: 4 },
+      ],
+    };
+  }
+
+  if (age === 9 && stageNumber === 21) {
+    // Age 9, Stage 21: 6x6 Grand Orbital Spiral to Core
+    return {
+      id: 'mem-9-21',
+      age: 9,
+      stageNumber: 21,
+      rows: 6,
+      cols: 6,
+      observeMs: 4600,
+      start: { r: 5, c: 2 },
+      goal: { r: 2, c: 2 },
+      safePath: [
+        { r: 5, c: 2 },
+        { r: 5, c: 3 },
+        { r: 5, c: 4 },
+        { r: 5, c: 5 },
+        { r: 4, c: 5 },
+        { r: 3, c: 5 },
+        { r: 2, c: 5 },
+        { r: 1, c: 5 },
+        { r: 0, c: 5 },
+        { r: 0, c: 4 },
+        { r: 0, c: 3 },
+        { r: 0, c: 2 },
+        { r: 0, c: 1 },
+        { r: 0, c: 0 },
+        { r: 1, c: 0 },
+        { r: 2, c: 0 },
+        { r: 3, c: 0 },
+        { r: 3, c: 1 },
+        { r: 3, c: 2 },
+        { r: 2, c: 2 },
+      ],
+      decoyCells: [
+        { r: 4, c: 2 },
+        { r: 1, c: 2 },
+        { r: 2, c: 3 },
+        { r: 4, c: 4 },
+        { r: 1, c: 4 },
+      ],
+      waypoints: [
+        { r: 5, c: 5 },
+        { r: 0, c: 5 },
+        { r: 0, c: 0 },
+        { r: 3, c: 0 },
+      ],
+    };
+  }
+
+  // Age 9, Stage 26: 6x6 Grand Triple-Column Aurora Wave
   return {
-    id: 'mem-9-16',
+    id: 'mem-9-26',
     age: 9,
-    stageNumber: 16,
+    stageNumber: 26,
     rows: 6,
     cols: 6,
-    observeMs: 5200,
+    observeMs: 4800,
     start: { r: 5, c: 0 },
-    goal: { r: 5, c: 2 },
+    goal: { r: 0, c: 5 },
     safePath: [
       { r: 5, c: 0 },
       { r: 4, c: 0 },
@@ -218,28 +397,33 @@ export function getMemoryMazeStage(
       { r: 0, c: 0 },
       { r: 0, c: 1 },
       { r: 0, c: 2 },
-      { r: 0, c: 3 },
-      { r: 0, c: 4 },
-      { r: 0, c: 5 },
-      { r: 1, c: 5 },
-      { r: 2, c: 5 },
-      { r: 3, c: 5 },
-      { r: 3, c: 4 },
-      { r: 3, c: 3 },
+      { r: 1, c: 2 },
+      { r: 2, c: 2 },
       { r: 3, c: 2 },
       { r: 4, c: 2 },
       { r: 5, c: 2 },
+      { r: 5, c: 3 },
+      { r: 5, c: 4 },
+      { r: 4, c: 4 },
+      { r: 3, c: 4 },
+      { r: 2, c: 4 },
+      { r: 1, c: 4 },
+      { r: 0, c: 4 },
+      { r: 0, c: 5 },
     ],
     decoyCells: [
-      { r: 2, c: 2 },
-      { r: 2, c: 3 },
-      { r: 4, c: 4 },
-      { r: 5, c: 4 },
+      { r: 2, c: 1 },
+      { r: 5, c: 1 },
+      { r: 0, c: 3 },
+      { r: 3, c: 3 },
+      { r: 2, c: 5 },
+      { r: 5, c: 5 },
     ],
     waypoints: [
       { r: 0, c: 0 },
-      { r: 0, c: 5 },
-      { r: 3, c: 2 },
+      { r: 5, c: 2 },
+      { r: 5, c: 4 },
+      { r: 0, c: 4 },
     ],
   };
 }
@@ -446,24 +630,122 @@ export function getSpatial3DStage(
     };
   }
 
-  // Age 9, Stage 17: 8-Voxel Quad-Jewel Astral Crown
+  if (age === 9 && stageNumber === 17) {
+    // Age 9, Stage 17: 8-Voxel Quad-Jewel Astral Crown
+    const target: Voxel[] = normalizeVoxels([
+      { x: 0, y: 0, z: 0, accent: 'violet' },
+      { x: 1, y: 0, z: 0, accent: 'cyan' },
+      { x: 2, y: 0, z: 0, accent: 'amber' },
+      { x: 1, y: 1, z: 0, accent: 'cyan' },
+      { x: 1, y: 2, z: 0, accent: 'mint' },
+      { x: 0, y: 1, z: 1, accent: 'cyan' },
+      { x: 1, y: 1, z: 1, accent: 'cyan' },
+      { x: 2, y: 1, z: 1, accent: 'violet' },
+    ]);
+    let initial = rotateVoxels(target, 'z', 1);
+    initial = rotateVoxels(initial, 'x', 1);
+    initial = rotateVoxels(initial, 'y', -1);
+    return {
+      id: 'sp3d-9-17',
+      age: 9,
+      stageNumber: 17,
+      target,
+      initial,
+    };
+  }
+
+  if (age === 7 && stageNumber === 22) {
+    // Age 7, Stage 22: 7-Voxel 4-Color Stair Spire
+    const target: Voxel[] = normalizeVoxels([
+      { x: 0, y: 0, z: 0, accent: 'cyan' },
+      { x: 1, y: 0, z: 0, accent: 'mint' },
+      { x: 1, y: 1, z: 0, accent: 'cyan' },
+      { x: 2, y: 1, z: 0, accent: 'amber' },
+      { x: 2, y: 2, z: 0, accent: 'violet' },
+      { x: 0, y: 0, z: 1, accent: 'amber' },
+      { x: 0, y: 1, z: 1, accent: 'cyan' },
+    ]);
+    let initial = rotateVoxels(target, 'y', 1);
+    initial = rotateVoxels(initial, 'x', -1);
+    initial = rotateVoxels(initial, 'z', 1);
+    return {
+      id: 'sp3d-7-22',
+      age: 7,
+      stageNumber: 22,
+      target,
+      initial,
+    };
+  }
+
+  if (age === 7 && stageNumber === 27) {
+    // Age 7, Stage 27: 8-Voxel Celestial Archway
+    const target: Voxel[] = normalizeVoxels([
+      { x: 0, y: 0, z: 0, accent: 'violet' },
+      { x: 0, y: 1, z: 0, accent: 'cyan' },
+      { x: 0, y: 2, z: 0, accent: 'mint' },
+      { x: 1, y: 2, z: 0, accent: 'cyan' },
+      { x: 2, y: 2, z: 0, accent: 'amber' },
+      { x: 2, y: 1, z: 0, accent: 'cyan' },
+      { x: 2, y: 0, z: 1, accent: 'mint' },
+      { x: 0, y: 0, z: 1, accent: 'amber' },
+    ]);
+    let initial = rotateVoxels(target, 'z', 1);
+    initial = rotateVoxels(initial, 'y', -1);
+    initial = rotateVoxels(initial, 'x', 1);
+    return {
+      id: 'sp3d-7-27',
+      age: 7,
+      stageNumber: 27,
+      target,
+      initial,
+    };
+  }
+
+  if (age === 9 && stageNumber === 22) {
+    // Age 9, Stage 22: 9-Voxel Spiral Helix Spire
+    const target: Voxel[] = normalizeVoxels([
+      { x: 0, y: 0, z: 0, accent: 'cyan' },
+      { x: 1, y: 0, z: 0, accent: 'mint' },
+      { x: 1, y: 0, z: 1, accent: 'cyan' },
+      { x: 1, y: 1, z: 1, accent: 'amber' },
+      { x: 2, y: 1, z: 1, accent: 'cyan' },
+      { x: 2, y: 2, z: 1, accent: 'violet' },
+      { x: 2, y: 2, z: 2, accent: 'mint' },
+      { x: 0, y: 1, z: 0, accent: 'amber' },
+      { x: 0, y: 2, z: 0, accent: 'violet' },
+    ]);
+    let initial = rotateVoxels(target, 'x', 1);
+    initial = rotateVoxels(initial, 'y', 1);
+    initial = rotateVoxels(initial, 'z', -1);
+    return {
+      id: 'sp3d-9-22',
+      age: 9,
+      stageNumber: 22,
+      target,
+      initial,
+    };
+  }
+
+  // Age 9, Stage 27: 10-Voxel Grand Sovereign Crystal Matrix
   const target: Voxel[] = normalizeVoxels([
-    { x: 0, y: 0, z: 0, accent: 'violet' },
+    { x: 0, y: 0, z: 0, accent: 'amber' },
     { x: 1, y: 0, z: 0, accent: 'cyan' },
-    { x: 2, y: 0, z: 0, accent: 'amber' },
+    { x: 2, y: 0, z: 0, accent: 'mint' },
     { x: 1, y: 1, z: 0, accent: 'cyan' },
-    { x: 1, y: 2, z: 0, accent: 'mint' },
+    { x: 1, y: 2, z: 0, accent: 'violet' },
+    { x: 2, y: 2, z: 0, accent: 'amber' },
+    { x: 0, y: 0, z: 1, accent: 'violet' },
     { x: 0, y: 1, z: 1, accent: 'cyan' },
-    { x: 1, y: 1, z: 1, accent: 'cyan' },
-    { x: 2, y: 1, z: 1, accent: 'violet' },
+    { x: 1, y: 1, z: 1, accent: 'mint' },
+    { x: 1, y: 1, z: 2, accent: 'amber' },
   ]);
-  let initial = rotateVoxels(target, 'z', 1);
-  initial = rotateVoxels(initial, 'x', 1);
-  initial = rotateVoxels(initial, 'y', -1);
+  let initial = rotateVoxels(target, 'y', 1);
+  initial = rotateVoxels(initial, 'z', 1);
+  initial = rotateVoxels(initial, 'x', -1);
   return {
-    id: 'sp3d-9-17',
+    id: 'sp3d-9-27',
     age: 9,
-    stageNumber: 17,
+    stageNumber: 27,
     target,
     initial,
   };

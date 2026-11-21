@@ -35,7 +35,7 @@ export interface SystemInventory {
   mirror?: number;
 }
 
-export type SystemStageNumber = 1 | 5 | 9 | 14;
+export type SystemStageNumber = 1 | 5 | 9 | 14 | 19 | 24;
 
 export interface SystemStageSpec {
   id: string;
@@ -553,25 +553,128 @@ export function getSystemStage(age: AgeGroup, stageNumber: SystemStageNumber): S
     };
   }
 
-  // Age 9, Stage 14: Exclusive Resonance (XOR Gate) + AND Gate Dual-Logic Synthesis
+  if (age === 9 && stageNumber === 14) {
+    // Age 9, Stage 14: Exclusive Resonance (XOR Gate) + AND Gate Dual-Logic Synthesis
+    const grid = emptyGrid(6, 6);
+    grid[1][0] = { kind: 'source', rot: 1, locked: true, color: 'cyan' };
+    grid[5][1] = { kind: 'source', rot: 1, locked: true, color: 'amber' };
+    grid[2][4] = { kind: 'xor_gate', rot: 0, locked: true };
+    grid[2][5] = { kind: 'target', rot: 0, locked: true, color: 'cyan' };
+    grid[4][4] = { kind: 'and_gate', rot: 0, locked: true };
+    grid[4][5] = { kind: 'target', rot: 0, locked: true, color: 'amber' };
+    grid[0][4] = { kind: 'rock', rot: 0, locked: true };
+    grid[2][2] = { kind: 'rock', rot: 0, locked: true };
+    grid[2][3] = { kind: 'rock', rot: 0, locked: true };
+    grid[4][2] = { kind: 'rock', rot: 0, locked: true };
+    return {
+      id: 'sys-9-14',
+      age: 9,
+      stageNumber: 14,
+      rows: 6,
+      cols: 6,
+      grid,
+      inventory: { splitter: 1, converter: 1, elbow: 4, straight: 6 },
+    };
+  }
+
+  if (age === 7 && stageNumber === 19) {
+    // Age 7, Stage 19: Quantum Mirror-Bridge-Portal Crossover
+    const grid = emptyGrid(5, 5);
+    grid[0][1] = { kind: 'source', rot: 2, locked: true, color: 'cyan' };
+    grid[2][0] = { kind: 'source', rot: 1, locked: true, color: 'amber' };
+    grid[4][1] = { kind: 'portal', rot: 0, locked: true, portalId: 'A' };
+    grid[1][4] = { kind: 'portal', rot: 0, locked: true, portalId: 'A' };
+    grid[0][4] = { kind: 'target', rot: 0, locked: true, color: 'amber' };
+    grid[3][2] = { kind: 'target', rot: 0, locked: true, color: 'cyan' };
+    grid[0][0] = { kind: 'rock', rot: 0, locked: true };
+    grid[1][3] = { kind: 'rock', rot: 0, locked: true };
+    grid[3][3] = { kind: 'rock', rot: 0, locked: true };
+    grid[3][4] = { kind: 'rock', rot: 0, locked: true };
+    return {
+      id: 'sys-7-19',
+      age: 7,
+      stageNumber: 19,
+      rows: 5,
+      cols: 5,
+      grid,
+      inventory: { bridge: 1, mirror: 1, elbow: 2, straight: 5 },
+    };
+  }
+
+  if (age === 7 && stageNumber === 24) {
+    // Age 7, Stage 24: Triple-Target Harmonic Prism
+    const grid = emptyGrid(5, 5);
+    grid[0][2] = { kind: 'source', rot: 2, locked: true, color: 'cyan' };
+    grid[4][0] = { kind: 'target', rot: 0, locked: true, color: 'cyan' };
+    grid[4][4] = { kind: 'target', rot: 0, locked: true, color: 'cyan' };
+    grid[0][4] = { kind: 'target', rot: 0, locked: true, color: 'amber' };
+    grid[0][1] = { kind: 'rock', rot: 0, locked: true };
+    grid[0][3] = { kind: 'rock', rot: 0, locked: true };
+    grid[3][1] = { kind: 'rock', rot: 0, locked: true };
+    grid[4][2] = { kind: 'rock', rot: 0, locked: true };
+    return {
+      id: 'sys-7-24',
+      age: 7,
+      stageNumber: 24,
+      rows: 5,
+      cols: 5,
+      grid,
+      inventory: { splitter: 2, converter: 1, elbow: 4, straight: 3 },
+    };
+  }
+
+  if (age === 9 && stageNumber === 19) {
+    // Age 9, Stage 19: Chromatic Logic Cascade (Bridge + Portal + Converter + XOR + AND)
+    const grid = emptyGrid(6, 6);
+    grid[0][2] = { kind: 'source', rot: 2, locked: true, color: 'cyan' };
+    grid[2][0] = { kind: 'source', rot: 1, locked: true, color: 'amber' };
+    grid[5][2] = { kind: 'portal', rot: 0, locked: true, portalId: 'A' };
+    grid[0][4] = { kind: 'portal', rot: 0, locked: true, portalId: 'A' };
+    grid[2][4] = { kind: 'xor_gate', rot: 0, locked: true };
+    grid[2][5] = { kind: 'target', rot: 0, locked: true, color: 'amber' };
+    grid[4][4] = { kind: 'and_gate', rot: 0, locked: true };
+    grid[4][5] = { kind: 'target', rot: 0, locked: true, color: 'cyan' };
+    grid[0][3] = { kind: 'rock', rot: 0, locked: true };
+    grid[1][3] = { kind: 'rock', rot: 0, locked: true };
+    grid[3][1] = { kind: 'rock', rot: 0, locked: true };
+    grid[3][5] = { kind: 'rock', rot: 0, locked: true };
+    grid[5][5] = { kind: 'rock', rot: 0, locked: true };
+    return {
+      id: 'sys-9-19',
+      age: 9,
+      stageNumber: 19,
+      rows: 6,
+      cols: 6,
+      grid,
+      inventory: { bridge: 1, splitter: 1, converter: 2, elbow: 4, straight: 5 },
+    };
+  }
+
+  // Age 9, Stage 24: Twin-Portal Mirror Symphony (Dual Portals + Mirror + XOR + 3 Targets)
   const grid = emptyGrid(6, 6);
-  grid[1][0] = { kind: 'source', rot: 1, locked: true, color: 'cyan' };
-  grid[5][1] = { kind: 'source', rot: 1, locked: true, color: 'amber' };
-  grid[2][4] = { kind: 'xor_gate', rot: 0, locked: true };
-  grid[2][5] = { kind: 'target', rot: 0, locked: true, color: 'cyan' };
-  grid[4][4] = { kind: 'and_gate', rot: 0, locked: true };
-  grid[4][5] = { kind: 'target', rot: 0, locked: true, color: 'amber' };
-  grid[0][4] = { kind: 'rock', rot: 0, locked: true };
-  grid[2][2] = { kind: 'rock', rot: 0, locked: true };
+  grid[0][1] = { kind: 'source', rot: 2, locked: true, color: 'cyan' };
+  grid[5][1] = { kind: 'source', rot: 0, locked: true, color: 'amber' };
+  grid[2][2] = { kind: 'portal', rot: 0, locked: true, portalId: 'A' };
+  grid[0][3] = { kind: 'portal', rot: 0, locked: true, portalId: 'A' };
+  grid[2][0] = { kind: 'portal', rot: 0, locked: true, portalId: 'B' };
+  grid[3][5] = { kind: 'portal', rot: 0, locked: true, portalId: 'B' };
+  grid[1][4] = { kind: 'xor_gate', rot: 0, locked: true };
+  grid[1][5] = { kind: 'target', rot: 0, locked: true, color: 'cyan' };
+  grid[5][4] = { kind: 'target', rot: 0, locked: true, color: 'amber' };
+  grid[4][2] = { kind: 'target', rot: 0, locked: true, color: 'cyan' };
+  grid[0][5] = { kind: 'rock', rot: 0, locked: true };
+  grid[1][3] = { kind: 'rock', rot: 0, locked: true };
   grid[2][3] = { kind: 'rock', rot: 0, locked: true };
-  grid[4][2] = { kind: 'rock', rot: 0, locked: true };
+  grid[2][4] = { kind: 'rock', rot: 0, locked: true };
+  grid[3][3] = { kind: 'rock', rot: 0, locked: true };
+  grid[4][5] = { kind: 'rock', rot: 0, locked: true };
   return {
-    id: 'sys-9-14',
+    id: 'sys-9-24',
     age: 9,
-    stageNumber: 14,
+    stageNumber: 24,
     rows: 6,
     cols: 6,
     grid,
-    inventory: { splitter: 1, converter: 1, elbow: 4, straight: 6 },
+    inventory: { mirror: 1, splitter: 1, converter: 1, elbow: 2, straight: 3 },
   };
 }

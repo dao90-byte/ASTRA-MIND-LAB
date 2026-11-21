@@ -36,7 +36,7 @@ export interface SandboxToolbox {
   wind?: number;
 }
 
-export type SandboxStageNumber = 4 | 8 | 13 | 18;
+export type SandboxStageNumber = 4 | 8 | 13 | 18 | 23 | 28;
 
 export interface SandboxStageSpec {
   id: string;
@@ -405,20 +405,128 @@ export function getSandboxStage(
     };
   }
 
-  // Age 9, Stage 18: Grand Zero-G Diamond Fortress & Quantum Wormhole
+  if (age === 9 && stageNumber === 18) {
+    // Age 9, Stage 18: Grand Zero-G Diamond Fortress & Quantum Wormhole
+    return {
+      id: 'sb-9-18',
+      age: 9,
+      stageNumber: 18,
+      gravityY: 0,
+      launcher: { x: 85, y: 250, vx: 240, vy: 0 },
+      portal: { x: 710, y: 250, r: 34 },
+      asteroids: [
+        { x: 340, y: 250, r: 48 },
+        { x: 500, y: 145, r: 38 },
+        { x: 500, y: 355, r: 38 },
+      ],
+      wormholes: [{ inX: 340, inY: 95, outX: 575, outY: 250, r: 28 }],
+      toolbox: {
+        plank: 2,
+        bumper: 2,
+        attractor: 2,
+        repulsor: 2,
+        wind: 2,
+      },
+    };
+  }
+
+  if (age === 7 && stageNumber === 23) {
+    // Age 7, Stage 23: Twin-Wormhole Gravity Ricochet
+    return {
+      id: 'sb-7-23',
+      age: 7,
+      stageNumber: 23,
+      gravityY: 110,
+      launcher: { x: 85, y: 130, vx: 225, vy: 0 },
+      portal: { x: 695, y: 375, r: 36 },
+      asteroids: [
+        { x: 380, y: 215, r: 46 },
+        { x: 530, y: 270, r: 40 },
+      ],
+      wormholes: [
+        { inX: 285, inY: 340, outX: 465, outY: 115, r: 28 },
+        { inX: 615, inY: 145, outX: 590, outY: 375, r: 28 },
+      ],
+      toolbox: {
+        plank: 2,
+        bumper: 2,
+        wind: 2,
+        attractor: 1,
+      },
+    };
+  }
+
+  if (age === 7 && stageNumber === 28) {
+    // Age 7, Stage 28: Supernova Dual-Gate Canyon
+    return {
+      id: 'sb-7-28',
+      age: 7,
+      stageNumber: 28,
+      gravityY: 135,
+      launcher: { x: 85, y: 260, vx: 230, vy: -30 },
+      portal: { x: 705, y: 165, r: 36 },
+      asteroids: [
+        { x: 350, y: 245, r: 46 },
+        { x: 515, y: 155, r: 38 },
+        { x: 525, y: 365, r: 42 },
+      ],
+      wormholes: [{ inX: 355, inY: 390, outX: 595, outY: 235, r: 30 }],
+      toolbox: {
+        plank: 2,
+        bumper: 2,
+        wind: 2,
+        attractor: 1,
+        repulsor: 1,
+      },
+    };
+  }
+
+  if (age === 9 && stageNumber === 23) {
+    // Age 9, Stage 23: Anti-Gravity Twin-Wormhole Slingshot
+    return {
+      id: 'sb-9-23',
+      age: 9,
+      stageNumber: 23,
+      gravityY: -185,
+      launcher: { x: 85, y: 370, vx: 235, vy: 0 },
+      portal: { x: 710, y: 130, r: 34 },
+      asteroids: [
+        { x: 340, y: 230, r: 48 },
+        { x: 510, y: 285, r: 46 },
+        { x: 625, y: 260, r: 34 },
+      ],
+      wormholes: [
+        { inX: 290, inY: 115, outX: 440, outY: 395, r: 28 },
+        { inX: 605, inY: 390, outX: 590, outY: 130, r: 28 },
+      ],
+      toolbox: {
+        plank: 2,
+        bumper: 2,
+        wind: 2,
+        attractor: 2,
+        repulsor: 1,
+      },
+    };
+  }
+
+  // Age 9, Stage 28: Grand Supernova Zero-G Twin-Wormhole Finale
   return {
-    id: 'sb-9-18',
+    id: 'sb-9-28',
     age: 9,
-    stageNumber: 18,
+    stageNumber: 28,
     gravityY: 0,
-    launcher: { x: 85, y: 250, vx: 240, vy: 0 },
-    portal: { x: 710, y: 250, r: 34 },
+    launcher: { x: 80, y: 250, vx: 245, vy: 0 },
+    portal: { x: 715, y: 250, r: 34 },
     asteroids: [
-      { x: 340, y: 250, r: 48 },
-      { x: 500, y: 145, r: 38 },
-      { x: 500, y: 355, r: 38 },
+      { x: 315, y: 250, r: 46 },
+      { x: 470, y: 155, r: 42 },
+      { x: 470, y: 345, r: 42 },
+      { x: 585, y: 250, r: 44 },
     ],
-    wormholes: [{ inX: 340, inY: 95, outX: 575, outY: 250, r: 28 }],
+    wormholes: [
+      { inX: 315, inY: 95, outX: 470, outY: 430, r: 28 },
+      { inX: 635, inY: 405, outX: 650, outY: 165, r: 28 },
+    ],
     toolbox: {
       plank: 2,
       bumper: 2,

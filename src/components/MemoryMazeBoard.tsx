@@ -1,6 +1,6 @@
 import { Progress, Toolbar } from 'radix-ui';
 import { useEffect, useMemo, useState } from 'react';
-import { Eye, EyeOff, RotateCcw } from 'lucide-react';
+import { Eye, EyeOff, Flag, Play, RotateCcw } from 'lucide-react';
 import {
   MazeCoord,
   MemoryStageNumber,
@@ -188,13 +188,15 @@ export function MemoryMazeBoard({
                   stroke="#E5BDFF"
                   strokeOpacity="0.95"
                   strokeWidth="5.5"
+                  strokeDasharray="10 6"
+                  className="animate-energy-flow"
                   strokeLinecap="square"
                   strokeLinejoin="miter"
                 />
                 {cometPos && (
                   <g transform={`translate(${cometPos.x} ${cometPos.y}) rotate(45)`}>
-                    <rect x="-10" y="-10" width="20" height="20" fill="#FFD23F" fillOpacity="0.38" />
-                    <rect x="-5.5" y="-5.5" width="11" height="11" fill="#FFFFFF" />
+                    <rect x="-12" y="-12" width="24" height="24" fill="#FFD23F" fillOpacity="0.45" />
+                    <rect x="-6" y="-6" width="12" height="12" fill="#FFFFFF" />
                   </g>
                 )}
               </>
@@ -205,7 +207,7 @@ export function MemoryMazeBoard({
                   points={tracedPath.map((p) => `${p.c * 100 + 50},${p.r * 100 + 50}`).join(' ')}
                   fill="none"
                   stroke={phase === 'won' ? '#2DF59A' : '#22EBFF'}
-                  strokeOpacity="0.32"
+                  strokeOpacity="0.34"
                   strokeWidth="14"
                   strokeLinecap="square"
                   strokeLinejoin="miter"
@@ -215,6 +217,8 @@ export function MemoryMazeBoard({
                   fill="none"
                   stroke={phase === 'won' ? '#2DF59A' : '#22EBFF'}
                   strokeWidth="5.5"
+                  strokeDasharray="10 6"
+                  className="animate-energy-flow"
                   strokeLinecap="square"
                   strokeLinejoin="miter"
                 />
@@ -260,7 +264,7 @@ export function MemoryMazeBoard({
                       isError
                         ? 'bg-[#42102E] border-[#FF6B8B] shadow-[0_0_26px_oklch(0.72_0.22_18_/_0.5)]'
                         : isGoal
-                        ? 'bg-[#0D3030] border-[#2DF59A] shadow-[0_0_24px_oklch(0.86_0.19_158_/_0.38)]'
+                        ? 'bg-[#0D3030] border-[#2DF59A] shadow-[0_0_32px_oklch(0.86_0.19_158_/_0.55)]'
                         : isTraced
                         ? 'bg-[#0C2E4F] border-[#22EBFF] shadow-[0_0_24px_oklch(0.87_0.16_196_/_0.4)]'
                         : phase === 'observe' && isSafe
@@ -268,7 +272,7 @@ export function MemoryMazeBoard({
                         : phase === 'observe' && isDecoy
                         ? 'bg-[#2B1730] border-[#FFD23F]/65'
                         : canClick
-                        ? 'bg-[#121C52] border-[#22EBFF]/55 hover:border-[#22EBFF] hover:bg-[#19286E] cursor-pointer'
+                        ? 'bg-[#121C52] border-[#22EBFF]/65 hover:border-[#22EBFF] hover:bg-[#19286E] cursor-pointer active:scale-95'
                         : 'bg-[#090D2B] border-[#222B5E]'
                     }`}
                   >
@@ -278,21 +282,39 @@ export function MemoryMazeBoard({
                         aria-hidden="true"
                       />
                     )}
-                    <span
-                      className={`rotate-45 transition-all ${
-                        isHead
-                          ? 'w-4.5 h-4.5 bg-[#22EBFF] shadow-[0_0_18px_oklch(0.87_0.16_196_/_0.9)]'
-                          : isGoal
-                          ? 'w-4 h-4 border-2 border-[#2DF59A] bg-[#2DF59A]/45'
-                          : showGlow
-                          ? 'w-3 h-3 bg-[#E5BDFF] shadow-[0_0_12px_oklch(0.75_0.21_294_/_0.8)]'
-                          : phase === 'observe' && isDecoy
-                          ? 'w-2.5 h-2.5 border border-[#FFD23F] bg-[#FFD23F]/35'
-                          : canClick
-                          ? 'w-2.5 h-2.5 bg-[#22EBFF]/60'
-                          : 'w-2 h-2 bg-[#3A437D]'
-                      }`}
-                    />
+                    {isGoal ? (
+                      <>
+                        <span
+                          className="absolute -inset-1 rounded-xl bg-[radial-gradient(circle,rgba(45,245,154,0.48)_0%,rgba(45,245,154,0.12)_58%,transparent_80%)] animate-goal-flare pointer-events-none"
+                          aria-hidden="true"
+                        />
+                        <span
+                          className="absolute inset-1 rounded-lg border-2 border-[#2DF59A]/80 animate-beacon-ring pointer-events-none"
+                          aria-hidden="true"
+                        />
+                        <div className="relative z-10 flex items-center justify-center w-8 h-8 rounded-lg border-2 border-[#2DF59A] bg-[#2DF59A]/25 shadow-[0_0_24px_oklch(0.86_0.19_158_/_0.8)] animate-float-alive">
+                          <Flag className="w-4.5 h-4.5 text-[#2DF59A] fill-[#2DF59A]/45 drop-shadow-[0_0_8px_rgba(45,245,154,0.9)]" />
+                        </div>
+                      </>
+                    ) : isStart && !isHead ? (
+                      <div className="relative flex items-center justify-center w-7.5 h-7.5 rounded-lg border-2 border-dashed border-[#22EBFF] bg-[#22EBFF]/15">
+                        <Play className="w-3.5 h-3.5 text-[#22EBFF] fill-current translate-x-0.5" />
+                      </div>
+                    ) : (
+                      <span
+                        className={`rotate-45 transition-all ${
+                          isHead
+                            ? 'w-5 h-5 bg-[#22EBFF] shadow-[0_0_18px_oklch(0.87_0.16_196_/_0.9)] ring-2 ring-white animate-float-alive'
+                            : showGlow
+                            ? 'w-3 h-3 bg-[#E5BDFF] shadow-[0_0_12px_oklch(0.75_0.21_294_/_0.8)]'
+                            : phase === 'observe' && isDecoy
+                            ? 'w-2.5 h-2.5 border border-[#FFD23F] bg-[#FFD23F]/35'
+                            : canClick
+                            ? 'w-3 h-3 bg-[#22EBFF]/80 shadow-[0_0_12px_oklch(0.87_0.16_196_/_0.75)]'
+                            : 'w-2 h-2 bg-[#3A437D]'
+                        }`}
+                      />
+                    )}
                   </button>
                 );
               })

@@ -73,12 +73,14 @@ function ModuleGlyph({
   if (kind === 'source') {
     const c = beamHex(color ?? 'cyan');
     return (
-      <svg viewBox="0 0 100 100" className="w-full h-full" aria-hidden="true">
+      <svg viewBox="0 0 100 100" className="w-full h-full drop-shadow-[0_0_10px_rgba(34,235,255,0.45)]" aria-hidden="true">
         <g transform={`rotate(${angle} 50 50)`}>
-          <polygon points="50,16 80,50 50,84 20,50" fill={`${c}1C`} stroke={c} strokeWidth="2.2" strokeOpacity="0.75" />
-          <polygon points="50,26 70,50 50,74 30,50" fill={`${c}35`} stroke={c} strokeWidth="3.2" />
-          <polygon points="50,5 62,28 38,28" fill={c} />
-          <polygon points="50,40 59,50 50,60 41,50" fill="#FFFFFF" />
+          <circle cx="50" cy="50" r="34" fill={`${c}18`} stroke={c} strokeWidth="2.2" strokeDasharray="6 4" />
+          <polygon points="50,24 72,50 50,76 28,50" fill={`${c}35`} stroke={c} strokeWidth="3.2" />
+          {/* Bold launch nozzle arrow protruding toward emission edge */}
+          <polygon points="50,3 65,28 35,28" fill={c} stroke="#FFFFFF" strokeWidth="1.5" />
+          {/* Inner Play-style core triangle pointing in beam direction */}
+          <polygon points="50,37 60,54 40,54" fill="#FFFFFF" />
         </g>
       </svg>
     );
@@ -87,10 +89,26 @@ function ModuleGlyph({
   if (kind === 'target') {
     const c = beamHex(color ?? 'cyan');
     return (
-      <svg viewBox="0 0 100 100" className="w-full h-full" aria-hidden="true">
-        <polygon points="50,14 82,32 82,68 50,86 18,68 18,32" fill={`${c}16`} stroke={c} strokeWidth="2.4" strokeDasharray="7 5" />
-        <polygon points="50,23 73,50 50,77 27,50" fill={`${c}36`} stroke={c} strokeWidth="3.2" strokeLinejoin="miter" />
-        <polygon points="50,41 59,50 50,59 41,50" fill={c} stroke="#FFFFFF" strokeWidth="1.4" />
+      <svg
+        viewBox="0 0 100 100"
+        className="w-full h-full animate-float-alive"
+        style={{ filter: `drop-shadow(0 0 10px ${c}AA)` }}
+        aria-hidden="true"
+      >
+        {/* Soft radial inner starlight */}
+        <circle cx="50" cy="50" r="38" fill={`${c}22`} />
+        {/* 4 inward target corner brackets */}
+        <path d="M16 30V16H30M70 16H84V30M84 70V84H70M30 84H16V70" fill="none" stroke={c} strokeWidth="3.4" strokeLinecap="square" />
+        <circle cx="50" cy="50" r="28" fill={`${c}24`} stroke={c} strokeWidth="2.4" strokeDasharray="6 5" />
+        {/* 4-point Goal Star */}
+        <polygon
+          points="50,23 57,43 77,50 57,57 50,77 43,57 23,50 43,43"
+          fill={`${c}55`}
+          stroke={c}
+          strokeWidth="2.6"
+          strokeLinejoin="miter"
+        />
+        <polygon points="50,41 59,50 50,59 41,50" fill="#FFFFFF" />
       </svg>
     );
   }
@@ -130,11 +148,25 @@ function ModuleGlyph({
     const [bx, by] = portPoint(pB);
     const [ox, oy] = portPoint(outP);
     const gateStroke = andState?.fired ? '#2DF59A' : isXor ? '#FF4EC6' : '#B378FF';
+    const outAngle = outP * 90;
+    const inAngleA = ((pA + 2) % 4) * 90;
+    const inAngleB = ((pB + 2) % 4) * 90;
     return (
       <svg viewBox="0 0 100 100" className="w-full h-full" aria-hidden="true">
         <line x1={ax} y1={ay} x2="50" y2="50" stroke={andState?.inputA ? '#22EBFF' : '#5864A8'} strokeWidth="6.5" strokeLinecap="square" />
         <line x1={bx} y1={by} x2="50" y2="50" stroke={andState?.inputB ? '#22EBFF' : '#5864A8'} strokeWidth="6.5" strokeLinecap="square" />
         <line x1="50" y1="50" x2={ox} y2={oy} stroke={andState?.fired ? '#2DF59A' : '#7682C2'} strokeWidth="6.5" strokeLinecap="square" />
+        {/* Input inward chevrons */}
+        <g transform={`rotate(${inAngleA} 50 50)`}>
+          <polygon points="50,83 56,94 44,94" fill={andState?.inputA ? '#22EBFF' : '#9AA6EB'} />
+        </g>
+        <g transform={`rotate(${inAngleB} 50 50)`}>
+          <polygon points="50,83 56,94 44,94" fill={andState?.inputB ? '#22EBFF' : '#9AA6EB'} />
+        </g>
+        {/* Output outward arrow */}
+        <g transform={`rotate(${outAngle} 50 50)`}>
+          <polygon points="50,4 58,18 42,18" fill={andState?.fired ? '#2DF59A' : '#FFFFFF'} />
+        </g>
         <polygon
           points="50,18 82,50 50,82 18,50"
           fill={andState?.fired ? '#0E4A42' : '#121847'}
@@ -198,9 +230,15 @@ function ModuleGlyph({
         )}
         {kind === 'bridge' && (
           <g>
-            <path d="M50 0V100" stroke="#7682C2" strokeWidth="9.5" />
-            <path d="M0 50H32M68 50H100" stroke={pipeColor} strokeWidth="9.5" />
-            <path d="M32 50L44 34H56L68 50" fill="none" stroke="#2DF59A" strokeWidth="8.5" strokeLinejoin="miter" />
+            {/* Underpass vertical tunnel */}
+            <path d="M50 0V32M50 68V100" stroke="#7682C2" strokeWidth="9.5" />
+            <path d="M50 32V68" stroke="#2D3770" strokeWidth="7" strokeDasharray="4 4" />
+            {/* Dark bridge deck gap separating overpass from underpass */}
+            <rect x="26" y="34" width="48" height="32" rx="4" fill="#090D2B" />
+            {/* Raised overpass bridge */}
+            <path d="M0 50H28M72 50H100" stroke={pipeColor} strokeWidth="9.5" />
+            <path d="M28 50L40 34H60L72 50" fill="none" stroke="#2DF59A" strokeWidth="8" strokeLinejoin="miter" />
+            <path d="M32 50H68" stroke="#2DF59A" strokeWidth="3.5" strokeOpacity="0.55" />
           </g>
         )}
         {kind === 'converter' && (
@@ -417,19 +455,46 @@ export function SystemBoard({
               className="absolute inset-3 w-[calc(100%-1.5rem)] h-[calc(100%-1.5rem)] pointer-events-none z-30"
               aria-hidden="true"
             >
-              {portalTethers.map(([pid, [a, b]]) => (
-                <line
-                  key={pid}
-                  x1={a.c * 100 + 50}
-                  y1={a.r * 100 + 50}
-                  x2={b.c * 100 + 50}
-                  y2={b.r * 100 + 50}
-                  stroke={pid === 'B' ? '#2DF59A' : '#FF4EC6'}
-                  strokeOpacity="0.45"
-                  strokeWidth="2.6"
-                  strokeDasharray="6 6"
-                />
-              ))}
+              {portalTethers.map(([pid, [a, b]]) => {
+                const col = pid === 'B' ? '#2DF59A' : '#FF4EC6';
+                const x1 = a.c * 100 + 50;
+                const y1 = a.r * 100 + 50;
+                const x2 = b.c * 100 + 50;
+                const y2 = b.r * 100 + 50;
+                const mx = (x1 + x2) / 2;
+                const my = (y1 + y2) / 2;
+                return (
+                  <g key={pid}>
+                    <line
+                      x1={x1}
+                      y1={y1}
+                      x2={x2}
+                      y2={y2}
+                      stroke={col}
+                      strokeOpacity="0.2"
+                      strokeWidth="10"
+                      strokeLinecap="round"
+                    />
+                    <line
+                      x1={x1}
+                      y1={y1}
+                      x2={x2}
+                      y2={y2}
+                      stroke={col}
+                      strokeOpacity="0.88"
+                      strokeWidth="3.2"
+                      strokeDasharray="7 5"
+                      className="animate-energy-flow"
+                    />
+                    <polygon
+                      points={`${mx},${my - 8} ${mx + 8},${my} ${mx},${my + 8} ${mx - 8},${my}`}
+                      fill="#0B1034"
+                      stroke={col}
+                      strokeWidth="2.4"
+                    />
+                  </g>
+                );
+              })}
             </svg>
           )}
 
@@ -467,13 +532,51 @@ export function SystemBoard({
                     disabled={cell.locked}
                     aria-label={`Grid cell ${r + 1},${c + 1} ${cell.kind}`}
                     className={`group relative rounded-xl border transition-all duration-150 flex items-center justify-center p-1 cosmo-tile ${
-                      cell.locked
+                      cell.kind === 'target'
+                        ? cell.color === 'amber'
+                          ? 'bg-[#261D0E] border-[#FFD23F]/80 shadow-[0_0_26px_oklch(0.89_0.17_84_/_0.42)]'
+                          : 'bg-[#0C263E] border-[#22EBFF]/80 shadow-[0_0_26px_oklch(0.87_0.16_196_/_0.42)]'
+                        : cell.kind === 'source'
+                        ? 'bg-[#0C2042] border-[#22EBFF]/60 shadow-[0_0_18px_oklch(0.87_0.16_196_/_0.25)]'
+                        : cell.locked
                         ? 'bg-[#0E133D] border-[#2E3878] cursor-default'
                         : cell.kind === 'empty'
-                        ? 'bg-[#080B26] border-[#222B5E] hover:border-[#22EBFF]/80 hover:bg-[#10184A] cursor-pointer'
-                        : 'bg-[#121D54] border-[#22EBFF]/80 hover:border-[#22EBFF] shadow-[0_0_24px_oklch(0.87_0.16_196_/_0.26)] cursor-pointer'
-                    } ${targetMatched ? 'ring-2 ring-[#2DF59A] shadow-[0_0_34px_oklch(0.86_0.19_158_/_0.65)]' : ''}`}
+                        ? 'bg-[#080B26] border-[#222B5E] hover:border-[#22EBFF]/80 hover:bg-[#10184A] cursor-pointer active:scale-95'
+                        : 'bg-[#121D54] border-[#22EBFF]/80 hover:border-[#22EBFF] shadow-[0_0_24px_oklch(0.87_0.16_196_/_0.26)] cursor-pointer active:scale-95'
+                    } ${targetMatched ? 'ring-2 ring-[#2DF59A] shadow-[0_0_38px_oklch(0.86_0.19_158_/_0.8)]' : ''}`}
                   >
+                    {cell.kind === 'target' && (
+                      <>
+                        <span
+                          className="absolute -inset-1 rounded-xl pointer-events-none animate-goal-flare"
+                          style={{
+                            background:
+                              cell.color === 'amber'
+                                ? 'radial-gradient(circle, rgba(255,210,63,0.42) 0%, rgba(255,210,63,0.10) 58%, transparent 80%)'
+                                : 'radial-gradient(circle, rgba(34,235,255,0.42) 0%, rgba(34,235,255,0.10) 58%, transparent 80%)',
+                          }}
+                          aria-hidden="true"
+                        />
+                        <span
+                          className={`absolute inset-1 rounded-lg border pointer-events-none animate-beacon-ring ${
+                            targetMatched
+                              ? 'border-[#2DF59A]'
+                              : cell.color === 'amber'
+                              ? 'border-[#FFD23F]/75'
+                              : 'border-[#22EBFF]/75'
+                          }`}
+                          aria-hidden="true"
+                        />
+                      </>
+                    )}
+
+                    {cell.kind === 'source' && (
+                      <span
+                        className="absolute inset-1 rounded-lg border border-[#22EBFF]/55 pointer-events-none animate-beacon-ring"
+                        aria-hidden="true"
+                      />
+                    )}
+
                     {cell.kind !== 'empty' && (
                       <ModuleGlyph
                         kind={cell.kind}

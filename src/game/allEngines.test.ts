@@ -57,9 +57,9 @@ function assertToolboxRespected(tools: PlacedTool[], toolbox: SandboxToolbox) {
   }
 }
 
-test('Progression unlocks strictly sequentially 1..18 and awards independent medals per age track', () => {
+test('Progression unlocks strictly sequentially 1..28 and awards independent medals per age track', () => {
   let p = createInitialProgress();
-  assert.equal(TOTAL_STAGES, 18);
+  assert.equal(TOTAL_STAGES, 28);
   assert.equal(isStageUnlocked(p, 7, 1), true);
   assert.equal(isStageUnlocked(p, 7, 2), false);
   assert.equal(isStageUnlocked(p, 9, 2), false);
@@ -70,8 +70,8 @@ test('Progression unlocks strictly sequentially 1..18 and awards independent med
     assert.equal(isStageUnlocked(p, 7, (s + 1) as StageNumber), true);
     assert.equal(isStageUnlocked(p, 9, 2), false);
   }
-  p = completeStageInProgress(p, 7, 18);
-  assert.equal(p[7].earnedMedals.length, 18);
+  p = completeStageInProgress(p, 7, 28);
+  assert.equal(p[7].earnedMedals.length, 28);
   assert.equal(p[9].earnedMedals.length, 0);
 });
 
@@ -209,6 +209,73 @@ test('System Thinking Age 9 Stage 1 & Stage 5 & Stage 9 (Dual Mirror + Twin Port
   assertInventoryRespected(g14, spec14.inventory);
   const solved14 = simulateSystemGrid(g14);
   assert.equal(solved14.won, true);
+
+  // Age 7 Stage 19: Quantum Mirror-Bridge-Portal Crossover
+  const spec719 = getSystemStage(7, 19);
+  assert.equal(simulateSystemGrid(spec719.grid).won, false);
+  const g719 = spec719.grid.map((row) => row.map((c) => ({ ...c })));
+  g719[1][1] = { kind: 'straight', rot: 0 };
+  g719[2][1] = { kind: 'bridge', rot: 0 };
+  g719[3][1] = { kind: 'straight', rot: 0 };
+  g719[2][4] = { kind: 'elbow', rot: 3 }; // N-W (Cyan exits Portal A at (1,4) going S)
+  g719[2][3] = { kind: 'straight', rot: 1 };
+  g719[2][2] = { kind: 'mirror', rot: 0 }; // '/' reflects E->S(cyan) and W->N(amber)
+  g719[1][2] = { kind: 'straight', rot: 0 };
+  g719[0][2] = { kind: 'elbow', rot: 1 }; // E-S
+  g719[0][3] = { kind: 'straight', rot: 1 };
+  assertInventoryRespected(g719, spec719.inventory);
+  assert.equal(simulateSystemGrid(g719).won, true);
+
+  // Age 7 Stage 24: Triple-Target Harmonic Prism
+  const spec724 = getSystemStage(7, 24);
+  assert.equal(simulateSystemGrid(spec724.grid).won, false);
+  const g724 = spec724.grid.map((row) => row.map((c) => ({ ...c })));
+  g724[1][2] = { kind: 'straight', rot: 0 };
+  g724[2][2] = { kind: 'splitter', rot: 0 }; // open N,E,W -> W & E
+  g724[2][1] = { kind: 'straight', rot: 1 };
+  g724[2][0] = { kind: 'elbow', rot: 1 }; // E-S
+  g724[3][0] = { kind: 'straight', rot: 0 };
+  g724[2][3] = { kind: 'splitter', rot: 2 }; // open E,S,W -> S & E
+  g724[3][3] = { kind: 'elbow', rot: 0 }; // N-E
+  g724[3][4] = { kind: 'elbow', rot: 2 }; // S-W
+  g724[2][4] = { kind: 'elbow', rot: 3 }; // W-N
+  g724[1][4] = { kind: 'converter', rot: 0 }; // N-S cyan -> amber
+  assertInventoryRespected(g724, spec724.inventory);
+  assert.equal(simulateSystemGrid(g724).won, true);
+
+  // Age 9 Stage 19: Chromatic Logic Cascade
+  const spec919 = getSystemStage(9, 19);
+  assert.equal(simulateSystemGrid(spec919.grid).won, false);
+  const g919 = spec919.grid.map((row) => row.map((c) => ({ ...c })));
+  g919[1][2] = { kind: 'straight', rot: 0 };
+  g919[2][2] = { kind: 'bridge', rot: 0 };
+  g919[3][2] = { kind: 'straight', rot: 0 };
+  g919[4][2] = { kind: 'straight', rot: 0 };
+  g919[1][4] = { kind: 'converter', rot: 0 }; // N-S cyan -> amber into XOR gate N port
+  g919[2][1] = { kind: 'straight', rot: 1 };
+  g919[2][3] = { kind: 'elbow', rot: 2 }; // S-W
+  g919[3][3] = { kind: 'splitter', rot: 1 }; // open N,E,S
+  g919[3][4] = { kind: 'elbow', rot: 2 }; // S-W into AND gate N port
+  g919[4][3] = { kind: 'converter', rot: 0 }; // amber -> cyan
+  g919[5][3] = { kind: 'elbow', rot: 0 }; // N-E
+  g919[5][4] = { kind: 'elbow', rot: 3 }; // W-N into AND gate S port
+  assertInventoryRespected(g919, spec919.inventory);
+  assert.equal(simulateSystemGrid(g919).won, true);
+
+  // Age 9 Stage 24: Twin-Portal Mirror Symphony
+  const spec924 = getSystemStage(9, 24);
+  assert.equal(simulateSystemGrid(spec924.grid).won, false);
+  const g924 = spec924.grid.map((row) => row.map((c) => ({ ...c })));
+  g924[1][1] = { kind: 'straight', rot: 0 };
+  g924[2][1] = { kind: 'mirror', rot: 1 }; // '\' reflects N->E(Portal A) and S->W(Portal B)
+  g924[0][4] = { kind: 'elbow', rot: 2 }; // S-W (Portal A exits (0,3) E -> S into XOR gate (1,4))
+  g924[3][1] = { kind: 'straight', rot: 0 };
+  g924[4][1] = { kind: 'straight', rot: 0 };
+  g924[3][4] = { kind: 'elbow', rot: 1 }; // E-S (Portal B exits (3,5) going W -> S)
+  g924[4][4] = { kind: 'splitter', rot: 3 }; // open N,S,W -> S(amber target) & W
+  g924[4][3] = { kind: 'converter', rot: 1 }; // E-W amber -> cyan into target(4,2)
+  assertInventoryRespected(g924, spec924.inventory);
+  assert.equal(simulateSystemGrid(g924).won, true);
 });
 
 test('Inhibitory Control Stages 2, 6, 10 (Warp), and 15 (Ice Slide) solve cleanly across Age 7 and Age 9', () => {
@@ -229,7 +296,7 @@ test('Inhibitory Control Stages 2, 6, 10 (Warp), and 15 (Ice Slide) solve cleanl
   assert.equal(s76.status, 'won');
 
   // Helper BFS solver for Inhibitory stages
-  const solveInhibitoryBFS = (age: 7 | 9, stageNum: 2 | 6 | 10 | 15): InhibitoryState | null => {
+  const solveInhibitoryBFS = (age: 7 | 9, stageNum: 2 | 6 | 10 | 15 | 20 | 25): InhibitoryState | null => {
     const spec = getInhibitoryStage(age, stageNum);
     const start = createInitialInhibitoryState(spec);
     const q: InhibitoryState[] = [start];
@@ -246,7 +313,8 @@ test('Inhibitory Control Stages 2, 6, 10 (Warp), and 15 (Ice Slide) solve cleanl
           .sort(([a], [b]) => a.localeCompare(b))
           .map(([k, v]) => `${k}:${v ? 1 : 0}`)
           .join('|');
-        const key = `${nxt.player.r},${nxt.player.c},${nxt.turn % 8},${gateKey}`;
+        const brokenKey = Object.keys(nxt.brokenTiles).sort().join(',');
+        const key = `${nxt.player.r},${nxt.player.c},${nxt.turn % 8},${gateKey},${brokenKey}`;
         if (!seen.has(key)) {
           seen.add(key);
           q.push(nxt);
@@ -257,7 +325,7 @@ test('Inhibitory Control Stages 2, 6, 10 (Warp), and 15 (Ice Slide) solve cleanl
   };
 
   for (const age of [7, 9] as const) {
-    for (const st of [2, 6, 10, 15] as const) {
+    for (const st of [2, 6, 10, 15, 20, 25] as const) {
       const winState = solveInhibitoryBFS(age, st);
       assert.ok(winState !== null, `Inhibitory Age ${age} Stage ${st} must be solvable`);
       assert.equal(winState.status, 'won');
@@ -269,7 +337,7 @@ test('Inhibitory Control Stages 2, 6, 10 (Warp), and 15 (Ice Slide) solve cleanl
 
 test('Working Memory Maze (Stages 3, 11, 16) and Spatial 3D (Stages 7, 12, 17) solve cleanly for Age 7 and Age 9', () => {
   for (const age of [7, 9] as const) {
-    for (const st of [3, 11, 16] as const) {
+    for (const st of [3, 11, 16, 21, 26] as const) {
       const maze = getMemoryMazeStage(age, st);
       assert.deepEqual(maze.safePath[0], maze.start);
       assert.deepEqual(maze.safePath[maze.safePath.length - 1], maze.goal);
@@ -296,8 +364,8 @@ test('Working Memory Maze (Stages 3, 11, 16) and Spatial 3D (Stages 7, 12, 17) s
       assert.equal(won, true);
     }
 
-    // Spatial 3D Stages 7, 12, 17: verify initial != target and reachable via 3D rotations
-    for (const st of [7, 12, 17] as const) {
+    // Spatial 3D Stages 7, 12, 17, 22, 27: verify initial != target and reachable via 3D rotations
+    for (const st of [7, 12, 17, 22, 27] as const) {
       const sp = getSpatial3DStage(age, st);
       assert.equal(voxelsMatch(sp.initial, sp.target), false, `Spatial3D Age ${age} Stage ${st} initial should not already match target`);
 
@@ -388,5 +456,48 @@ test('Emergent Sandbox Stages 4, 8, 13 (Wormhole), and 18 (Anti-Gravity) fail em
   ];
   assertToolboxRespected(sol918, sb918.toolbox);
   assert.equal(simulateFullSandboxRun(sb918, sol918).won, true);
+
+  // Age 7 Stage 23: Twin-Wormhole Gravity Ricochet
+  const sb723 = getSandboxStage(7, 23);
+  assert.equal(simulateFullSandboxRun(sb723, []).won, false);
+  const sol723: PlacedTool[] = [
+    { id: 'w1', kind: 'wind', x: 165, y: 140, angleDeg: 85 },
+    { id: 'w2', kind: 'wind', x: 470, y: 120, angleDeg: -20 },
+    { id: 'a1', kind: 'attractor', x: 695, y: 375, angleDeg: 0 },
+  ];
+  assertToolboxRespected(sol723, sb723.toolbox);
+  assert.equal(simulateFullSandboxRun(sb723, sol723).won, true);
+
+  // Age 7 Stage 28: Supernova Dual-Gate Canyon
+  const sb728 = getSandboxStage(7, 28);
+  assert.equal(simulateFullSandboxRun(sb728, []).won, false);
+  const sol728: PlacedTool[] = [
+    { id: 'w1', kind: 'wind', x: 200, y: 300, angleDeg: 65 },
+    { id: 'a1', kind: 'attractor', x: 705, y: 165, angleDeg: 0 },
+  ];
+  assertToolboxRespected(sol728, sb728.toolbox);
+  assert.equal(simulateFullSandboxRun(sb728, sol728).won, true);
+
+  // Age 9 Stage 23: Anti-Gravity Twin-Wormhole Slingshot
+  const sb923 = getSandboxStage(9, 23);
+  assert.equal(simulateFullSandboxRun(sb923, []).won, false);
+  const sol923: PlacedTool[] = [
+    { id: 'w1', kind: 'wind', x: 220, y: 310, angleDeg: -65 },
+    { id: 'w2', kind: 'wind', x: 445, y: 395, angleDeg: 0 },
+    { id: 'a1', kind: 'attractor', x: 710, y: 130, angleDeg: 0 },
+  ];
+  assertToolboxRespected(sol923, sb923.toolbox);
+  assert.equal(simulateFullSandboxRun(sb923, sol923).won, true);
+
+  // Age 9 Stage 28: Grand Supernova Zero-G Twin-Wormhole Finale
+  const sb928 = getSandboxStage(9, 28);
+  assert.equal(simulateFullSandboxRun(sb928, []).won, false);
+  const sol928: PlacedTool[] = [
+    { id: 'w1', kind: 'wind', x: 180, y: 230, angleDeg: -60 },
+    { id: 'w2', kind: 'wind', x: 475, y: 425, angleDeg: -20 },
+    { id: 'a1', kind: 'attractor', x: 715, y: 250, angleDeg: 0 },
+  ];
+  assertToolboxRespected(sol928, sb928.toolbox);
+  assert.equal(simulateFullSandboxRun(sb928, sol928).won, true);
 });
 

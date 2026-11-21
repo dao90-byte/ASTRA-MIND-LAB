@@ -216,6 +216,78 @@ export function CosmicMedalEmblem({
           <polygon points="32,28 36,32 32,36 28,32" fill="#FFFFFF" />
         </g>
       )}
+      {shape === 'constellation' && (
+        <g>
+          <path d="M16 40L28 22L40 34L48 18" stroke={stroke} strokeWidth="2" strokeLinecap="round" />
+          <polygon points="16,36 20,40 16,44 12,40" fill={core} />
+          <polygon points="28,18 32,22 28,26 24,22" fill="#FFFFFF" />
+          <polygon points="40,30 44,34 40,38 36,34" fill={core} />
+          <polygon points="48,14 52,18 48,22 44,18" fill="#FFFFFF" />
+        </g>
+      )}
+      {shape === 'sentinel' && (
+        <g>
+          <polygon points="32,12 49,32 32,52 15,32" stroke={stroke} strokeWidth="2" strokeDasharray="4 3" fill={fill} />
+          <polygon points="32,20 42,32 32,44 22,32" stroke="#FFFFFF" strokeWidth="1.6" fill={core} />
+          <polygon points="32,28 36,32 32,36 28,32" fill="#FFFFFF" />
+        </g>
+      )}
+      {shape === 'aurora' && (
+        <g>
+          <path d="M14 42L26 22L36 32L50 18" stroke={stroke} strokeWidth="2.6" strokeLinecap="square" />
+          <path d="M16 48L28 31L38 40L50 26" stroke="#FFFFFF" strokeOpacity="0.7" strokeWidth="1.6" />
+          <polygon points="32,14 36,19 32,24 28,19" fill={core} />
+        </g>
+      )}
+      {shape === 'crown' && (
+        <g>
+          <polygon points="15,43 18,22 26,31 32,15 38,31 46,22 49,43" stroke={stroke} strokeWidth="2.2" fill={fill} strokeLinejoin="miter" />
+          <polygon points="32,29 36,34 32,39 28,34" fill="#FFFFFF" />
+        </g>
+      )}
+      {shape === 'singularity' && (
+        <g>
+          <polygon points="32,12 44,20 52,32 44,44 32,52 20,44 12,32 20,20" stroke={stroke} strokeWidth="1.8" strokeDasharray="3 3" />
+          <polygon points="32,20 42,32 32,44 22,32" fill={core} stroke="#FFFFFF" strokeWidth="1.5" />
+          <circle cx="32" cy="32" r="4" fill="#0A0E2B" />
+        </g>
+      )}
+      {shape === 'prism_array' && (
+        <g>
+          <polygon points="32,13 46,34 18,34" stroke={stroke} strokeWidth="2" fill={fill} />
+          <polygon points="22,31 31,47 13,47" stroke={stroke} strokeWidth="1.8" fill={core} />
+          <polygon points="42,31 51,47 33,47" stroke={stroke} strokeWidth="1.8" fill={core} />
+        </g>
+      )}
+      {shape === 'chrono_lock' && (
+        <g>
+          <polygon points="20,14 44,14 32,32" stroke={stroke} strokeWidth="2" fill={fill} />
+          <polygon points="32,32 44,50 20,50" stroke={stroke} strokeWidth="2" fill={core} />
+          <line x1="16" y1="32" x2="48" y2="32" stroke="#FFFFFF" strokeWidth="1.5" />
+        </g>
+      )}
+      {shape === 'nebula_web' && (
+        <g>
+          <polygon points="32,13 49,23 49,41 32,51 15,41 15,23" stroke={stroke} strokeWidth="1.9" fill={fill} />
+          <line x1="32" y1="13" x2="32" y2="51" stroke={stroke} strokeWidth="1.5" />
+          <line x1="15" y1="23" x2="49" y2="41" stroke={stroke} strokeWidth="1.5" />
+          <line x1="49" y1="23" x2="15" y2="41" stroke={stroke} strokeWidth="1.5" />
+          <polygon points="32,26 38,32 32,38 26,32" fill="#FFFFFF" />
+        </g>
+      )}
+      {shape === 'celestial_orb' && (
+        <g>
+          <polygon points="32,12 48,22 48,42 32,52 16,42 16,22" stroke={stroke} strokeWidth="2" fill={fill} />
+          <polygon points="14,32 32,21 50,32 32,43" stroke="#FFFFFF" strokeWidth="1.6" />
+          <polygon points="32,23 41,32 32,41 23,32" fill={core} />
+        </g>
+      )}
+      {shape === 'supernova' && (
+        <g>
+          <polygon points="32,10 38,24 53,21 41,32 53,43 38,40 32,54 26,40 11,43 23,32 11,21 26,24" stroke={stroke} strokeWidth="2" fill={fill} />
+          <polygon points="32,24 40,32 32,40 24,32" fill={core} stroke="#FFFFFF" strokeWidth="1.5" />
+        </g>
+      )}
     </svg>
   );
 }
@@ -277,7 +349,7 @@ export function MedalVaultModal({
             </Dialog.Close>
           </div>
 
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5">
+          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2.5">
             {STAGE_DESCRIPTORS.map((desc) => {
               const earned = earnedMedals.includes(desc.stage);
               return (

@@ -259,11 +259,11 @@ export function Spatial3DBoard({
       ped.add(disc);
 
       const haloRing = new THREE.Mesh(
-        new THREE.TorusGeometry(1.86, 0.032, 6, 8),
+        new THREE.TorusGeometry(1.86, 0.036, 6, 8),
         new THREE.MeshStandardMaterial({
           color: glowColor,
           emissive: glowColor,
-          emissiveIntensity: 1.15,
+          emissiveIntensity: 1.35,
           roughness: 0.1,
           metalness: 0.5,
           flatShading: true,
@@ -279,21 +279,21 @@ export function Spatial3DBoard({
           map: glowTex,
           color: glowColor,
           transparent: true,
-          opacity: 0.65,
+          opacity: 0.72,
           blending: THREE.AdditiveBlending,
           depthWrite: false,
         })
       );
       auraSprite.position.set(0, 1.85, 0);
-      auraSprite.scale.setScalar(4.4);
+      auraSprite.scale.setScalar(4.6);
       ped.add(auraSprite);
 
       safeScene.add(ped);
-      return ped;
+      return { ped, auraSprite, haloRing };
     };
 
     const safeScene = scene;
-    buildPedestal(-2.45, 2.45, colorFromOklch(0.84, 0.19, 158));
+    const targetPedestal = buildPedestal(-2.45, 2.45, colorFromOklch(0.84, 0.19, 158));
     buildPedestal(2.45, -2.45, colorFromOklch(0.85, 0.16, 196));
 
     const targetGroup = new THREE.Group();
@@ -317,8 +317,16 @@ export function Spatial3DBoard({
 
     stopLoop = startPacedThreeLoop(renderer, safeScene, camera, isSoftwareGl, (dt, elapsed) => {
       const bob = Math.sin(elapsed * 2.1) * 0.08;
+      const targetGlowPulse = 0.5 + 0.5 * Math.sin(elapsed * 2.8);
       targetGroup.position.y = 0.18 + bob;
       currentGroup.position.y = 0.18 + bob;
+
+      leftBeacon.intensity = 7.5 + targetGlowPulse * 4.5;
+      rightBeacon.intensity = 7 + (1 - targetGlowPulse) * 2.5;
+      targetPedestal.auraSprite.scale.setScalar(4.4 + targetGlowPulse * 0.65);
+      (targetPedestal.auraSprite.material as THREE.SpriteMaterial).opacity =
+        0.58 + targetGlowPulse * 0.28;
+      targetPedestal.haloRing.rotation.z += dt * 0.45;
 
       animQuatRef.current.slerp(_identityQuat, Math.min(1, dt * 16));
       currentGroup.quaternion.copy(animQuatRef.current);
@@ -418,9 +426,13 @@ export function Spatial3DBoard({
             >
               {/* Left Target Check Emblem */}
               <div
-                className="absolute top-3.5 left-3.5 z-10 w-10 h-10 rounded-xl bg-[#0A2426] border border-[#2DF59A]/85 flex items-center justify-center text-[#2DF59A] shadow-[0_0_18px_oklch(0.84_0.19_158_/_0.35)] pointer-events-none"
+                className="absolute top-3.5 left-3.5 z-10 w-10 h-10 rounded-xl bg-[#0A2426] border border-[#2DF59A] flex items-center justify-center text-[#2DF59A] shadow-[0_0_24px_oklch(0.84_0.19_158_/_0.65)] pointer-events-none animate-float-alive"
                 data-testid="spatial-target"
               >
+                <span
+                  className="absolute -inset-1 rounded-xl border border-[#2DF59A]/60 animate-beacon-ring"
+                  aria-hidden="true"
+                />
                 <Check className="w-5 h-5 stroke-[2.4]" />
               </div>
 

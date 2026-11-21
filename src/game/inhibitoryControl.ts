@@ -39,7 +39,7 @@ export interface SentinelDef {
   orbit: Coord[]; // looping or ping-pong path array
 }
 
-export type InhibitoryStageNumber = 2 | 6 | 10 | 15;
+export type InhibitoryStageNumber = 2 | 6 | 10 | 15 | 20 | 25;
 
 export interface InhibitoryStageSpec {
   id: string;
@@ -566,50 +566,259 @@ export function getInhibitoryStage(
     };
   }
 
-  // Age 9, Stage 15: Frictionless Ice Slide + Twin Sentinels + Phase Gate
+  if (age === 9 && stageNumber === 15) {
+    // Age 9, Stage 15: Frictionless Ice Slide + Twin Sentinels + Phase Gate
+    const tiles = makeFloor(6, 6);
+    tiles[5][0] = 'void';
+    tiles[4][0] = 'void';
+    tiles[3][0] = 'void';
+    tiles[4][2] = 'void';
+    tiles[3][2] = 'void';
+    tiles[4][1] = 'ice';
+    tiles[3][1] = 'ice';
+    tiles[1][2] = 'ice';
+    tiles[1][3] = 'ice';
+    tiles[1][5] = 'phase_gate';
+    tiles[0][5] = 'goal';
+    return {
+      id: 'inh-9-15',
+      age: 9,
+      stageNumber: 15,
+      rows: 6,
+      cols: 6,
+      start: { r: 5, c: 1 },
+      goal: { r: 0, c: 5 },
+      maxMoves: 10,
+      allowWait: true,
+      tiles,
+      initialGatesOpen: {},
+      switches: [],
+      phaseGates: [{ r: 1, c: 5, period: 2, openMod: 1 }],
+      sentinels: [
+        {
+          id: 's1',
+          orbit: [
+            { r: 2, c: 2 },
+            { r: 2, c: 1 },
+            { r: 2, c: 2 },
+            { r: 2, c: 3 },
+          ],
+        },
+        {
+          id: 's2',
+          orbit: [
+            { r: 2, c: 4 },
+            { r: 1, c: 4 },
+            { r: 0, c: 4 },
+            { r: 1, c: 4 },
+          ],
+        },
+      ],
+    };
+  }
+
+  if (age === 7 && stageNumber === 20) {
+    // Age 7, Stage 20: Chrono-Phase Ice & Fragile Bridge Gauntlet
+    const tiles = makeFloor(5, 5);
+    tiles[3][0] = 'void';
+    tiles[3][1] = 'void';
+    tiles[3][2] = 'void';
+    tiles[1][0] = 'void';
+    tiles[1][1] = 'void';
+    tiles[1][2] = 'void';
+    tiles[1][4] = 'void';
+    tiles[3][4] = 'void';
+    tiles[4][4] = 'void';
+    tiles[4][1] = 'ice';
+    tiles[4][2] = 'ice';
+    tiles[3][3] = 'fragile';
+    tiles[1][3] = 'phase_gate';
+    tiles[0][4] = 'goal';
+    return {
+      id: 'inh-7-20',
+      age: 7,
+      stageNumber: 20,
+      rows: 5,
+      cols: 5,
+      start: { r: 4, c: 0 },
+      goal: { r: 0, c: 4 },
+      maxMoves: 10,
+      allowWait: true,
+      tiles,
+      initialGatesOpen: {},
+      switches: [],
+      phaseGates: [{ r: 1, c: 3, period: 2, openMod: 1 }],
+      sentinels: [
+        {
+          id: 's1',
+          orbit: [
+            { r: 2, c: 2 },
+            { r: 2, c: 3 },
+            { r: 2, c: 4 },
+            { r: 2, c: 3 },
+          ],
+        },
+      ],
+    };
+  }
+
+  if (age === 7 && stageNumber === 25) {
+    // Age 7, Stage 25: Warp onto Ice Runway + Remote Switch + Sentinel
+    const tiles = makeFloor(5, 5);
+    tiles[2][0] = 'void';
+    tiles[2][1] = 'void';
+    tiles[2][2] = 'void';
+    tiles[2][4] = 'void';
+    tiles[3][3] = 'void';
+    tiles[4][3] = 'void';
+    tiles[0][3] = 'void';
+    tiles[3][0] = 'warp';
+    tiles[4][2] = 'switch';
+    tiles[1][2] = 'ice';
+    tiles[1][3] = 'ice';
+    tiles[1][4] = 'gate';
+    tiles[0][4] = 'goal';
+    return {
+      id: 'inh-7-25',
+      age: 7,
+      stageNumber: 25,
+      rows: 5,
+      cols: 5,
+      start: { r: 4, c: 0 },
+      goal: { r: 0, c: 4 },
+      maxMoves: 10,
+      allowWait: true,
+      tiles,
+      initialGatesOpen: { '1,4': false },
+      switches: [{ r: 4, c: 2, targets: [{ r: 1, c: 4 }] }],
+      warpLinks: [{ from: { r: 3, c: 0 }, to: { r: 1, c: 1 } }],
+      phaseGates: [],
+      sentinels: [
+        {
+          id: 's1',
+          orbit: [
+            { r: 2, c: 3 },
+            { r: 1, c: 3 },
+            { r: 2, c: 3 },
+            { r: 1, c: 4 },
+          ],
+        },
+      ],
+    };
+  }
+
+  if (age === 9 && stageNumber === 20) {
+    // Age 9, Stage 20: Double-Sentinel Warp & Ice Paradox
+    const tiles = makeFloor(6, 6);
+    tiles[3][1] = 'void';
+    tiles[3][2] = 'void';
+    tiles[3][3] = 'void';
+    tiles[3][4] = 'void';
+    tiles[3][5] = 'void';
+    tiles[4][4] = 'void';
+    tiles[4][5] = 'void';
+    tiles[0][3] = 'void';
+    tiles[1][3] = 'void';
+    tiles[5][3] = 'switch';
+    tiles[4][0] = 'warp';
+    tiles[2][3] = 'ice';
+    tiles[2][4] = 'ice';
+    tiles[1][5] = 'gate';
+    tiles[0][4] = 'phase_gate';
+    tiles[0][5] = 'goal';
+    return {
+      id: 'inh-9-20',
+      age: 9,
+      stageNumber: 20,
+      rows: 6,
+      cols: 6,
+      start: { r: 5, c: 0 },
+      goal: { r: 0, c: 5 },
+      maxMoves: 14,
+      allowWait: true,
+      tiles,
+      initialGatesOpen: { '1,5': false },
+      switches: [{ r: 5, c: 3, targets: [{ r: 1, c: 5 }] }],
+      warpLinks: [{ from: { r: 4, c: 0 }, to: { r: 2, c: 2 } }],
+      phaseGates: [{ r: 0, c: 4, period: 2, openMod: 0 }],
+      sentinels: [
+        {
+          id: 's1',
+          orbit: [
+            { r: 5, c: 2 },
+            { r: 4, c: 2 },
+            { r: 5, c: 2 },
+            { r: 4, c: 3 },
+          ],
+        },
+        {
+          id: 's2',
+          orbit: [
+            { r: 1, c: 4 },
+            { r: 2, c: 5 },
+            { r: 1, c: 4 },
+            { r: 2, c: 4 },
+          ],
+        },
+      ],
+    };
+  }
+
+  // Age 9, Stage 25: Triple-Switch Mirror Lock + Fragile Shortcut + Twin Sentinels
   const tiles = makeFloor(6, 6);
-  tiles[5][0] = 'void';
-  tiles[4][0] = 'void';
-  tiles[3][0] = 'void';
-  tiles[4][2] = 'void';
-  tiles[3][2] = 'void';
-  tiles[4][1] = 'ice';
-  tiles[3][1] = 'ice';
-  tiles[1][2] = 'ice';
-  tiles[1][3] = 'ice';
-  tiles[1][5] = 'phase_gate';
+  tiles[0][3] = 'void';
+  tiles[1][3] = 'void';
+  tiles[3][3] = 'void';
+  tiles[4][3] = 'void';
+  tiles[5][3] = 'void';
+  tiles[3][5] = 'void';
+  tiles[4][4] = 'void';
+  tiles[0][4] = 'void';
+  tiles[5][2] = 'switch'; // toggles GateA (2,3) & GateC (1,5)
+  tiles[2][1] = 'switch'; // toggles GateA (2,3) & GateB (1,4)
+  tiles[2][3] = 'gate';   // GateA (initially true)
+  tiles[1][4] = 'gate';   // GateB (initially false)
+  tiles[1][5] = 'gate';   // GateC (initially true)
+  tiles[2][4] = 'fragile';
   tiles[0][5] = 'goal';
   return {
-    id: 'inh-9-15',
+    id: 'inh-9-25',
     age: 9,
-    stageNumber: 15,
+    stageNumber: 25,
     rows: 6,
     cols: 6,
-    start: { r: 5, c: 1 },
+    start: { r: 5, c: 0 },
     goal: { r: 0, c: 5 },
-    maxMoves: 10,
+    maxMoves: 16,
     allowWait: true,
     tiles,
-    initialGatesOpen: {},
-    switches: [],
-    phaseGates: [{ r: 1, c: 5, period: 2, openMod: 1 }],
+    initialGatesOpen: {
+      '2,3': true,
+      '1,4': false,
+      '1,5': true,
+    },
+    switches: [
+      { r: 5, c: 2, targets: [{ r: 2, c: 3 }, { r: 1, c: 5 }] },
+      { r: 2, c: 1, targets: [{ r: 2, c: 3 }, { r: 1, c: 4 }] },
+    ],
+    phaseGates: [],
     sentinels: [
       {
         id: 's1',
         orbit: [
-          { r: 2, c: 2 },
-          { r: 2, c: 1 },
-          { r: 2, c: 2 },
-          { r: 2, c: 3 },
+          { r: 4, c: 1 },
+          { r: 4, c: 2 },
+          { r: 3, c: 2 },
+          { r: 3, c: 1 },
         ],
       },
       {
         id: 's2',
         orbit: [
+          { r: 2, c: 5 },
           { r: 2, c: 4 },
-          { r: 1, c: 4 },
-          { r: 0, c: 4 },
-          { r: 1, c: 4 },
+          { r: 2, c: 5 },
+          { r: 3, c: 4 },
         ],
       },
     ],

@@ -102,6 +102,46 @@
   }
 }
 
+@keyframes goal-flare {
+  0%, 100% {
+    opacity: 0.55;
+    transform: scale(0.95);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.12);
+  }
+}
+
+@keyframes energy-flow {
+  from {
+    stroke-dashoffset: 48;
+  }
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes float-alive {
+  0%, 100% {
+    transform: translateY(0px) scale(1);
+  }
+  50% {
+    transform: translateY(-2.5px) scale(1.04);
+  }
+}
+
+@keyframes stage-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.97) translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
 @keyframes medal-forge {
   0% {
     opacity: 0;
@@ -125,6 +165,22 @@
   animation: beacon-ring 2.2s cubic-bezier(0.16, 1, 0.3, 1) infinite;
 }
 
+.animate-goal-flare {
+  animation: goal-flare 2.1s ease-in-out infinite;
+}
+
+.animate-energy-flow {
+  animation: energy-flow 1.35s linear infinite;
+}
+
+.animate-float-alive {
+  animation: float-alive 2.4s ease-in-out infinite;
+}
+
+.animate-stage-enter {
+  animation: stage-enter 280ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
 .animate-medal-forge {
   animation: medal-forge 520ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
@@ -132,6 +188,10 @@
 @media (prefers-reduced-motion: reduce) {
   .animate-slow-spin,
   .animate-beacon-ring,
+  .animate-goal-flare,
+  .animate-energy-flow,
+  .animate-float-alive,
+  .animate-stage-enter,
   .animate-medal-forge {
     animation: none !important;
   }

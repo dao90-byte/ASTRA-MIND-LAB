@@ -18,7 +18,17 @@ export type StageNumber =
   | 15
   | 16
   | 17
-  | 18;
+  | 18
+  | 19
+  | 20
+  | 21
+  | 22
+  | 23
+  | 24
+  | 25
+  | 26
+  | 27
+  | 28;
 
 export type CognitivePillar =
   | 'system'
@@ -47,7 +57,17 @@ export type MedalShape =
   | 'hypercube'
   | 'pulsar'
   | 'zenith'
-  | 'infinity';
+  | 'infinity'
+  | 'constellation'
+  | 'sentinel'
+  | 'aurora'
+  | 'crown'
+  | 'singularity'
+  | 'prism_array'
+  | 'chrono_lock'
+  | 'nebula_web'
+  | 'celestial_orb'
+  | 'supernova';
 
 export interface StageDescriptor {
   stage: StageNumber;

@@ -9,9 +9,13 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronUp,
+  Flag,
   Hourglass,
+  KeyRound,
   Lock,
   LockOpen,
+  Play,
+  Rocket,
   RotateCcw,
   Undo2,
 } from 'lucide-react';
@@ -158,37 +162,111 @@ export function InhibitoryBoard({
             className="absolute inset-3.5 w-[calc(100%-1.75rem)] h-[calc(100%-1.75rem)] pointer-events-none z-30"
             aria-hidden="true"
           >
+            <defs>
+              <marker id="bridgeArrowLocked" markerWidth="6" markerHeight="6" refX="4.5" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill="#FFD23F" />
+              </marker>
+              <marker id="bridgeArrowOpen" markerWidth="6" markerHeight="6" refX="4.5" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill="#2DF59A" />
+              </marker>
+              <marker id="warpBridgeArrow" markerWidth="6" markerHeight="6" refX="4.5" refY="3" orient="auto">
+                <path d="M0,0 L6,3 L0,6 Z" fill="#C792FF" />
+              </marker>
+            </defs>
+
             {spec.switches.map((sw, idx) =>
               sw.targets.map((tgt, tidx) => {
                 const open = Boolean(state.gatesOpen[keyOf(tgt.r, tgt.c)]);
+                const x1 = sw.c * 100 + 50;
+                const y1 = sw.r * 100 + 50;
+                const x2 = tgt.c * 100 + 50;
+                const y2 = tgt.r * 100 + 50;
+                const mx = (x1 + x2) / 2;
+                const my = (y1 + y2) / 2;
                 return (
-                  <line
-                    key={`tether-${idx}-${tidx}`}
-                    x1={sw.c * 100 + 50}
-                    y1={sw.r * 100 + 50}
-                    x2={tgt.c * 100 + 50}
-                    y2={tgt.r * 100 + 50}
-                    stroke={open ? '#2DF59A' : '#FFD23F'}
-                    strokeOpacity="0.52"
-                    strokeWidth="3"
-                    strokeDasharray="7 7"
-                  />
+                  <g key={`tether-${idx}-${tidx}`}>
+                    <line
+                      x1={x1}
+                      y1={y1}
+                      x2={x2}
+                      y2={y2}
+                      stroke={open ? '#2DF59A' : '#FFD23F'}
+                      strokeOpacity="0.22"
+                      strokeWidth="10"
+                      strokeLinecap="round"
+                    />
+                    <line
+                      x1={x1}
+                      y1={y1}
+                      x2={mx}
+                      y2={my}
+                      stroke={open ? '#2DF59A' : '#FFD23F'}
+                      strokeOpacity="0.92"
+                      strokeWidth="3.6"
+                      strokeDasharray="7 5"
+                      className="animate-energy-flow"
+                      markerEnd={open ? 'url(#bridgeArrowOpen)' : 'url(#bridgeArrowLocked)'}
+                    />
+                    <line
+                      x1={mx}
+                      y1={my}
+                      x2={x2}
+                      y2={y2}
+                      stroke={open ? '#2DF59A' : '#FFD23F'}
+                      strokeOpacity="0.92"
+                      strokeWidth="3.6"
+                      strokeDasharray="7 5"
+                      className="animate-energy-flow"
+                    />
+                  </g>
                 );
               })
             )}
-            {spec.warpLinks?.map((wl, idx) => (
-              <line
-                key={`warp-link-${idx}`}
-                x1={wl.from.c * 100 + 50}
-                y1={wl.from.r * 100 + 50}
-                x2={wl.to.c * 100 + 50}
-                y2={wl.to.r * 100 + 50}
-                stroke="#B378FF"
-                strokeOpacity="0.72"
-                strokeWidth="3.2"
-                strokeDasharray="6 5"
-              />
-            ))}
+            {spec.warpLinks?.map((wl, idx) => {
+              const x1 = wl.from.c * 100 + 50;
+              const y1 = wl.from.r * 100 + 50;
+              const x2 = wl.to.c * 100 + 50;
+              const y2 = wl.to.r * 100 + 50;
+              const mx = (x1 + x2) / 2;
+              const my = (y1 + y2) / 2;
+              return (
+                <g key={`warp-link-${idx}`}>
+                  <line
+                    x1={x1}
+                    y1={y1}
+                    x2={x2}
+                    y2={y2}
+                    stroke="#B378FF"
+                    strokeOpacity="0.24"
+                    strokeWidth="10"
+                    strokeLinecap="round"
+                  />
+                  <line
+                    x1={x1}
+                    y1={y1}
+                    x2={mx}
+                    y2={my}
+                    stroke="#C792FF"
+                    strokeOpacity="0.92"
+                    strokeWidth="3.6"
+                    strokeDasharray="6 4"
+                    className="animate-energy-flow"
+                    markerEnd="url(#warpBridgeArrow)"
+                  />
+                  <line
+                    x1={mx}
+                    y1={my}
+                    x2={x2}
+                    y2={y2}
+                    stroke="#C792FF"
+                    strokeOpacity="0.92"
+                    strokeWidth="3.6"
+                    strokeDasharray="6 4"
+                    className="animate-energy-flow"
+                  />
+                </g>
+              );
+            })}
             {spec.sentinels.map((s) => {
               const pts = s.orbit.map((o) => `${o.c * 100 + 50},${o.r * 100 + 50}`).join(' ');
               return (
@@ -197,9 +275,10 @@ export function InhibitoryBoard({
                   points={pts}
                   fill="none"
                   stroke="#FF4EC6"
-                  strokeOpacity="0.48"
+                  strokeOpacity="0.52"
                   strokeWidth="3"
                   strokeDasharray="5 5"
+                  className="animate-energy-flow"
                 />
               );
             })}
@@ -216,6 +295,7 @@ export function InhibitoryBoard({
               row.map((tile, c) => {
                 const k = keyOf(r, c);
                 const broken = Boolean(state.brokenTiles[k]);
+                const isStart = spec.start.r === r && spec.start.c === c;
                 const isPlayer = state.player.r === r && state.player.c === c;
                 const dr = r - state.player.r;
                 const dc = c - state.player.c;
@@ -269,7 +349,7 @@ export function InhibitoryBoard({
                         : isPlayer
                         ? 'bg-[#0C2E4F] border-[#22EBFF] shadow-[0_0_26px_oklch(0.87_0.16_196_/_0.45)]'
                         : tile === 'goal'
-                        ? 'bg-[#0D3030] border-[#2DF59A] shadow-[0_0_24px_oklch(0.86_0.19_158_/_0.38)]'
+                        ? 'bg-[#0D3030] border-[#2DF59A] shadow-[0_0_32px_oklch(0.86_0.19_158_/_0.55)]'
                         : tile === 'ice'
                         ? 'bg-[#0E2848] border-[#66F2FF]/70 hover:border-[#66F2FF]'
                         : isAdjacent && passableNext && state.status === 'playing'
@@ -277,6 +357,17 @@ export function InhibitoryBoard({
                         : 'bg-[#0C1136] border-[#252D66]'
                     }`}
                   >
+                    {isStart && !isPlayer && tile !== 'goal' && (
+                      <div
+                        className="absolute inset-1.5 rounded-lg border-2 border-dashed border-[#22EBFF]/55 flex items-center justify-center pointer-events-none"
+                        aria-hidden="true"
+                      >
+                        {!isAdjacent && (
+                          <Play className="w-3.5 h-3.5 text-[#22EBFF]/55 fill-current" />
+                        )}
+                      </div>
+                    )}
+
                     {sentinelNext && !sentinelHere && (
                       <div
                         className="absolute inset-2 rounded-lg border border-dashed border-[#FF4EC6]/75 pointer-events-none"
@@ -286,40 +377,52 @@ export function InhibitoryBoard({
 
                     {isWarpDest && !isPlayer && (
                       <div
-                        className="absolute inset-2 rotate-45 border border-dashed border-[#B378FF]/70 pointer-events-none"
+                        className="absolute inset-2 rotate-45 border-2 border-dashed border-[#C792FF]/80 pointer-events-none"
                         aria-hidden="true"
                       />
                     )}
 
                     {isAdjacent && passableNext && state.status === 'playing' && !isPlayer && tile === 'floor' && !sentinelHere && (
                       <span
-                        className="text-[#22EBFF]/65 group-hover:text-white transition-colors pointer-events-none"
+                        className="text-[#22EBFF]/75 group-hover:text-white transition-colors pointer-events-none"
                         aria-hidden="true"
                       >
                         {dr === -1 ? (
-                          <ChevronUp className="w-5 h-5" />
+                          <ChevronUp className="w-5.5 h-5.5" />
                         ) : dr === 1 ? (
-                          <ChevronDown className="w-5 h-5" />
+                          <ChevronDown className="w-5.5 h-5.5" />
                         ) : dc === -1 ? (
-                          <ChevronLeft className="w-5 h-5" />
+                          <ChevronLeft className="w-5.5 h-5.5" />
                         ) : (
-                          <ChevronRight className="w-5 h-5" />
+                          <ChevronRight className="w-5.5 h-5.5" />
                         )}
                       </span>
                     )}
 
                     {tile === 'goal' && !isPlayer && (
-                      <div className="w-7 h-7 rotate-45 border-2 border-[#2DF59A] flex items-center justify-center shadow-[0_0_16px_oklch(0.86_0.19_158_/_0.6)]">
-                        <div className="w-3 h-3 bg-[#2DF59A]" />
-                      </div>
+                      <>
+                        <span
+                          className="absolute -inset-1 rounded-xl bg-[radial-gradient(circle,rgba(45,245,154,0.48)_0%,rgba(45,245,154,0.12)_58%,transparent_80%)] animate-goal-flare pointer-events-none"
+                          aria-hidden="true"
+                        />
+                        <span
+                          className="absolute inset-1 rounded-lg border-2 border-[#2DF59A]/80 animate-beacon-ring pointer-events-none"
+                          aria-hidden="true"
+                        />
+                        <div className="relative z-10 flex items-center justify-center w-9 h-9 rounded-lg border-2 border-[#2DF59A] bg-[#2DF59A]/25 shadow-[0_0_24px_oklch(0.86_0.19_158_/_0.85)] animate-float-alive">
+                          <Flag className="w-5 h-5 text-[#2DF59A] fill-[#2DF59A]/45 drop-shadow-[0_0_8px_rgba(45,245,154,0.9)]" />
+                        </div>
+                      </>
                     )}
 
                     {tile === 'switch' && !isPlayer && (
-                      <div className="w-6 h-6 rotate-45 bg-[#FFD23F]/28 border-2 border-[#FFD23F] shadow-[0_0_14px_oklch(0.89_0.17_84_/_0.5)]" />
+                      <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-[#FFD23F]/22 border-2 border-[#FFD23F] shadow-[0_0_18px_oklch(0.89_0.17_84_/_0.65)] animate-float-alive">
+                        <KeyRound className="w-4.5 h-4.5 text-[#FFD23F]" />
+                      </div>
                     )}
 
                     {tile === 'warp' && !isPlayer && (
-                      <div className="relative w-7 h-7 rotate-45 border-2 border-[#B378FF] bg-[#B378FF]/25 flex items-center justify-center shadow-[0_0_18px_oklch(0.75_0.21_294_/_0.6)]">
+                      <div className="relative w-7.5 h-7.5 rotate-45 border-2 border-[#B378FF] bg-[#B378FF]/28 flex items-center justify-center shadow-[0_0_18px_oklch(0.75_0.21_294_/_0.65)]">
                         <div className="w-2.5 h-2.5 bg-[#FFFFFF]" />
                       </div>
                     )}
@@ -333,14 +436,22 @@ export function InhibitoryBoard({
                     )}
 
                     {tile === 'fragile' && !isPlayer && (
-                      <div className="relative w-7 h-7 rounded-md border border-dashed border-[#22EBFF]/80 flex items-center justify-center">
-                        <span className="w-4 h-px bg-[#22EBFF]/80 rotate-45" />
+                      <div className="relative w-7.5 h-7.5 rounded-md border-2 border-dashed border-[#22EBFF]/85 bg-[#22EBFF]/10 flex items-center justify-center">
+                        <svg viewBox="0 0 24 24" className="w-4.5 h-4.5 text-[#88FAFF]" fill="none" aria-hidden="true">
+                          <path d="M5 5L11 11L9 14L19 19" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
+                        </svg>
                       </div>
                     )}
 
                     {tile === 'gate' && !isPlayer && (
-                      <div className={gateOpen ? 'text-[#2DF59A]' : 'text-[#FF4EC6]'}>
-                        {gateOpen ? <LockOpen className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
+                      <div
+                        className={`w-8 h-8 rounded-lg border-2 flex items-center justify-center ${
+                          gateOpen
+                            ? 'border-[#2DF59A] bg-[#2DF59A]/15 text-[#2DF59A]'
+                            : 'border-[#FFD23F] bg-[#FF4EC6]/18 text-[#FFD23F]'
+                        }`}
+                      >
+                        {gateOpen ? <LockOpen className="w-4.5 h-4.5" /> : <Lock className="w-4.5 h-4.5" />}
                       </div>
                     )}
 
@@ -372,8 +483,8 @@ export function InhibitoryBoard({
                     )}
 
                     {isPlayer && (
-                      <div className="relative z-10 w-7 h-7 rotate-45 bg-gradient-to-br from-[#99FBFF] to-[#22EBFF] shadow-[0_0_24px_oklch(0.87_0.16_196_/_0.88)] flex items-center justify-center">
-                        <div className="w-2.5 h-2.5 bg-[#050819]" />
+                      <div className="relative z-10 w-8 h-8 rounded-lg bg-gradient-to-br from-[#99FBFF] to-[#22EBFF] shadow-[0_0_24px_oklch(0.87_0.16_196_/_0.9)] flex items-center justify-center animate-float-alive">
+                        <Rocket className="w-5 h-5 text-[#050819] fill-[#050819]/25 -rotate-45" />
                       </div>
                     )}
                   </button>

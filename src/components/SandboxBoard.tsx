@@ -77,20 +77,6 @@ export function SandboxBoard({
   const draggingIdRef = useRef<string | null>(null);
   const wonTriggeredRef = useRef(false);
 
-  // Extended live trajectory hypothesis preview
-  const previewPoints = useMemo(() => {
-    let sim = createInitialOrb(spec);
-    const pts: Array<{ x: number; y: number }> = [{ x: sim.x, y: sim.y }];
-    for (let i = 0; i < 64; i++) {
-      sim = stepSandboxPhysics(spec, sim, tools, 1 / 60);
-      if (i % 2 === 1) pts.push({ x: sim.x, y: sim.y });
-      if (sim.won || sim.outOfBounds) break;
-    }
-    return pts;
-  }, [spec, tools]);
-  const previewPointsRef = useRef(previewPoints);
-  previewPointsRef.current = previewPoints;
-
   toolsRef.current = tools;
   isRunningRef.current = isRunning;
   selectedIdRef.current = selectedId;
@@ -185,31 +171,70 @@ export function SandboxBoard({
         }
       }
 
-      // Render Paired Quantum Crystal Wormholes
+      // Render Paired Quantum Crystal Wormhole Bridges (IN -> OUT)
       if (spec.wormholes) {
         for (const wh of spec.wormholes) {
           ctx.save();
-          ctx.strokeStyle = 'rgba(179, 120, 255, 0.45)';
-          ctx.lineWidth = 2.2;
-          ctx.setLineDash([7, 7]);
+          // Outer bridge glow + dashed energy conduit
+          ctx.strokeStyle = 'rgba(179, 120, 255, 0.22)';
+          ctx.lineWidth = 8;
+          ctx.beginPath();
+          ctx.moveTo(wh.inX, wh.inY);
+          ctx.lineTo(wh.outX, wh.outY);
+          ctx.stroke();
+
+          ctx.strokeStyle = 'rgba(215, 165, 255, 0.72)';
+          ctx.lineWidth = 2.6;
+          ctx.setLineDash([8, 6]);
+          ctx.lineDashOffset = -t * 28;
           ctx.beginPath();
           ctx.moveTo(wh.inX, wh.inY);
           ctx.lineTo(wh.outX, wh.outY);
           ctx.stroke();
           ctx.setLineDash([]);
 
+          // Flowing light spark along Wormhole bridge (IN -> OUT)
+          const pulsePhase = (t * 0.7) % 1;
+          const px = wh.inX + (wh.outX - wh.inX) * pulsePhase;
+          const py = wh.inY + (wh.outY - wh.inY) * pulsePhase;
+          const sparkGrad = ctx.createRadialGradient(px, py, 1, px, py, 14);
+          sparkGrad.addColorStop(0, 'rgba(255, 255, 255, 0.95)');
+          sparkGrad.addColorStop(0.4, 'rgba(199, 146, 255, 0.75)');
+          sparkGrad.addColorStop(1, 'rgba(199, 146, 255, 0)');
+          ctx.fillStyle = sparkGrad;
+          ctx.beginPath();
+          ctx.arc(px, py, 14, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Midpoint directional arrow showing IN -> OUT bridge direction
+          const mx = (wh.inX + wh.outX) / 2;
+          const my = (wh.inY + wh.outY) / 2;
+          const ang = Math.atan2(wh.outY - wh.inY, wh.outX - wh.inX);
+          ctx.save();
+          ctx.translate(mx, my);
+          ctx.rotate(ang);
+          ctx.fillStyle = '#E5BDFF';
+          ctx.beginPath();
+          ctx.moveTo(10, 0);
+          ctx.lineTo(-6, -7);
+          ctx.lineTo(-3, 0);
+          ctx.lineTo(-6, 7);
+          ctx.closePath();
+          ctx.fill();
+          ctx.restore();
+
           const drawWormholeNode = (wx: number, wy: number, col: string, dir: number) => {
             ctx.save();
             ctx.translate(wx, wy);
             ctx.rotate(t * 1.4 * dir);
-            ctx.fillStyle = 'rgba(18, 22, 68, 0.85)';
+            ctx.fillStyle = 'rgba(18, 22, 68, 0.88)';
             ctx.strokeStyle = col;
-            ctx.lineWidth = 2.4;
+            ctx.lineWidth = 2.8;
             ctx.beginPath();
             for (let s = 0; s < 8; s++) {
-              const ang = (s * Math.PI) / 4;
-              const px = Math.cos(ang) * wh.r;
-              const py = Math.sin(ang) * wh.r;
+              const a = (s * Math.PI) / 4;
+              const px = Math.cos(a) * wh.r;
+              const py = Math.sin(a) * wh.r;
               if (s === 0) ctx.moveTo(px, py);
               else ctx.lineTo(px, py);
             }
@@ -231,17 +256,6 @@ export function SandboxBoard({
           drawWormholeNode(wh.inX, wh.inY, '#FF4EC6', 1);
           drawWormholeNode(wh.outX, wh.outY, '#B378FF', -1);
           ctx.restore();
-        }
-      }
-
-      if (!isRunningRef.current && previewPointsRef.current.length > 2) {
-        const pts = previewPointsRef.current;
-        for (let i = 1; i < pts.length; i++) {
-          const alpha = Math.max(0.08, 0.72 * (1 - i / pts.length));
-          ctx.fillStyle = `rgba(34, 235, 255, ${alpha.toFixed(2)})`;
-          ctx.beginPath();
-          ctx.arc(pts[i].x, pts[i].y, 2.3, 0, Math.PI * 2);
-          ctx.fill();
         }
       }
 
@@ -442,67 +456,165 @@ export function SandboxBoard({
         ctx.restore();
       }
 
+      // Unmistakable Luminous Goal Target Beacon (Volumetric Radial Light + Emerald Star-Target + Corner Brackets)
       const p = spec.portal;
+      const goalPulse = 1 + Math.sin(t * 3.2) * 0.08;
       ctx.save();
       ctx.translate(p.x, p.y);
-      ctx.strokeStyle = 'rgba(45, 245, 154, 0.25)';
-      ctx.lineWidth = 5;
+
+      // Volumetric radial light bloom illuminating surrounding arena
+      const goalGlow = ctx.createRadialGradient(0, 0, 4, 0, 0, p.r * 2.75 * goalPulse);
+      goalGlow.addColorStop(0, 'rgba(180, 255, 224, 0.52)');
+      goalGlow.addColorStop(0.35, 'rgba(45, 245, 154, 0.36)');
+      goalGlow.addColorStop(0.7, 'rgba(45, 245, 154, 0.12)');
+      goalGlow.addColorStop(1, 'rgba(45, 245, 154, 0)');
+      ctx.fillStyle = goalGlow;
       ctx.beginPath();
-      ctx.arc(0, 0, p.r + 6, 0, Math.PI * 2);
+      ctx.arc(0, 0, p.r * 2.75 * goalPulse, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Rotating soft light rays behind the Goal beacon
+      ctx.save();
+      ctx.rotate(t * 0.45);
+      for (let ray = 0; ray < 6; ray++) {
+        ctx.rotate(Math.PI / 3);
+        ctx.fillStyle = 'rgba(45, 245, 154, 0.12)';
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(-9, -p.r * 1.9);
+        ctx.lineTo(9, -p.r * 1.9);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+
+      // Expanding beacon shockwave ring
+      const wavePhase = (t * 0.65) % 1;
+      ctx.strokeStyle = `rgba(45, 245, 154, ${(1 - wavePhase) * 0.65})`;
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.arc(0, 0, p.r + wavePhase * 28, 0, Math.PI * 2);
       ctx.stroke();
+
+      ctx.strokeStyle = 'rgba(45, 245, 154, 0.38)';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.arc(0, 0, (p.r + 9) * goalPulse, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 4 inward corner target brackets
+      const br = p.r + 12;
+      ctx.strokeStyle = '#6BFFBF';
+      ctx.lineWidth = 2.8;
+      for (let q = 0; q < 4; q++) {
+        ctx.save();
+        ctx.rotate((q * Math.PI) / 2);
+        ctx.beginPath();
+        ctx.moveTo(-br, -br + 9);
+        ctx.lineTo(-br, -br);
+        ctx.lineTo(-br + 9, -br);
+        ctx.stroke();
+        ctx.restore();
+      }
+
+      ctx.save();
       ctx.rotate(t * 0.9);
       ctx.strokeStyle = '#2DF59A';
-      ctx.lineWidth = 2.6;
+      ctx.lineWidth = 2.8;
       ctx.setLineDash([12, 8]);
       ctx.beginPath();
       ctx.arc(0, 0, p.r, 0, Math.PI * 2);
       ctx.stroke();
       ctx.setLineDash([]);
-      ctx.fillStyle = 'rgba(45, 245, 154, 0.2)';
+      ctx.fillStyle = 'rgba(45, 245, 154, 0.25)';
       ctx.beginPath();
-      for (let s = 0; s < 6; s++) {
-        const ang = (s * Math.PI) / 3;
-        const px = Math.cos(ang) * p.r * 0.72;
-        const py = Math.sin(ang) * p.r * 0.72;
-        if (s === 0) ctx.moveTo(px, py);
-        else ctx.lineTo(px, py);
-      }
-      ctx.closePath();
+      ctx.arc(0, 0, p.r - 2, 0, Math.PI * 2);
       ctx.fill();
       ctx.restore();
 
-      const l = spec.launcher;
-      const launchAngle = Math.atan2(l.vy, l.vx);
-      ctx.save();
-      ctx.translate(l.x, l.y);
-      ctx.rotate(launchAngle);
-      ctx.fillStyle = '#0A0F2E';
-      ctx.strokeStyle = '#22EBFF';
-      ctx.lineWidth = 2.4;
+      // Orbiting light motes circling the Goal Star
+      for (let m = 0; m < 3; m++) {
+        const ma = t * 2.1 + (m * Math.PI * 2) / 3;
+        const mx = Math.cos(ma) * (p.r + 4);
+        const my = Math.sin(ma) * (p.r + 4);
+        ctx.fillStyle = '#FFFFFF';
+        ctx.beginPath();
+        ctx.arc(mx, my, 2.4, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Central 4-point Goal Star
+      ctx.fillStyle = '#2DF59A';
+      ctx.strokeStyle = '#FFFFFF';
+      ctx.lineWidth = 1.8;
       ctx.beginPath();
-      ctx.moveTo(-16, -12);
-      ctx.lineTo(18, -8);
-      ctx.lineTo(26, 0);
-      ctx.lineTo(18, 8);
-      ctx.lineTo(-16, 12);
+      for (let i = 0; i < 8; i++) {
+        const a = (i * Math.PI) / 4 - Math.PI / 2;
+        const rad = i % 2 === 0 ? p.r * 0.56 : p.r * 0.23;
+        const sx = Math.cos(a) * rad;
+        const sy = Math.sin(a) * rad;
+        if (i === 0) ctx.moveTo(sx, sy);
+        else ctx.lineTo(sx, sy);
+      }
       ctx.closePath();
       ctx.fill();
       ctx.stroke();
       ctx.restore();
 
+      // Unmistakable Start Launch Pad (Radiant Cyan Halo + Launcher + Play Chevron)
+      const l = spec.launcher;
+      const launchAngle = Math.atan2(l.vy, l.vx);
+      ctx.save();
+      ctx.translate(l.x, l.y);
+
+      const startGlow = ctx.createRadialGradient(0, 0, 4, 0, 0, 48);
+      startGlow.addColorStop(0, 'rgba(34, 235, 255, 0.34)');
+      startGlow.addColorStop(1, 'rgba(34, 235, 255, 0)');
+      ctx.fillStyle = startGlow;
+      ctx.beginPath();
+      ctx.arc(0, 0, 48, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = 'rgba(34, 235, 255, 0.42)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(0, 0, 28 + Math.sin(t * 3) * 2.5, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.rotate(launchAngle);
+      ctx.fillStyle = '#0B163F';
+      ctx.strokeStyle = '#22EBFF';
+      ctx.lineWidth = 2.6;
+      ctx.beginPath();
+      ctx.moveTo(-18, -14);
+      ctx.lineTo(18, -9);
+      ctx.lineTo(28, 0);
+      ctx.lineTo(18, 9);
+      ctx.lineTo(-18, 14);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+
+      // Inner bright Play / Forward arrow inside the start launcher
+      ctx.fillStyle = '#22EBFF';
+      ctx.beginPath();
+      ctx.moveTo(-6, -6);
+      ctx.lineTo(8, 0);
+      ctx.lineTo(-6, 6);
+      ctx.closePath();
+      ctx.fill();
+
+      // Short nozzle direction chevron (without revealing ball path!)
+      ctx.strokeStyle = 'rgba(34, 235, 255, 0.85)';
+      ctx.lineWidth = 2.4;
+      ctx.beginPath();
+      ctx.moveTo(33, -6);
+      ctx.lineTo(40, 0);
+      ctx.lineTo(33, 6);
+      ctx.stroke();
+      ctx.restore();
+
       const orb = orbRef.current;
-      if (orb.trail.length > 1) {
-        ctx.strokeStyle = orb.won ? '#2DF59A' : '#22EBFF';
-        ctx.lineWidth = 2.6;
-        ctx.globalAlpha = 0.78;
-        ctx.beginPath();
-        ctx.moveTo(orb.trail[0].x, orb.trail[0].y);
-        for (let i = 1; i < orb.trail.length; i++) {
-          ctx.lineTo(orb.trail[i].x, orb.trail[i].y);
-        }
-        ctx.stroke();
-        ctx.globalAlpha = 1;
-      }
 
       // Spinning faceted crystal energy core (zero flat cartoon circles)
       ctx.save();

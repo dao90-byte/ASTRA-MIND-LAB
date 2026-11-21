@@ -23,27 +23,38 @@ interface GalaxyMapProps {
 }
 
 const NODE_POSITIONS: Array<{ x: number; y: number }> = [
-  // Row 1: Stages 1..6 (Left -> Right)
-  { x: 9, y: 20 },
-  { x: 25, y: 14 },
-  { x: 41, y: 21 },
-  { x: 58, y: 14 },
-  { x: 74, y: 21 },
-  { x: 90, y: 15 },
-  // Row 2: Stages 7..12 (Right -> Left)
-  { x: 90, y: 49 },
-  { x: 74, y: 55 },
-  { x: 58, y: 48 },
-  { x: 41, y: 55 },
-  { x: 25, y: 48 },
-  { x: 9, y: 54 },
-  // Row 3: Stages 13..18 (Left -> Right)
-  { x: 9, y: 82 },
-  { x: 25, y: 87 },
-  { x: 41, y: 80 },
-  { x: 58, y: 87 },
-  { x: 74, y: 80 },
-  { x: 90, y: 85 },
+  // Row 1: Stages 1..7 (Left -> Right)
+  { x: 8, y: 14 },
+  { x: 22, y: 9 },
+  { x: 36, y: 15 },
+  { x: 50, y: 9 },
+  { x: 64, y: 15 },
+  { x: 78, y: 9 },
+  { x: 92, y: 14 },
+  // Row 2: Stages 8..14 (Right -> Left)
+  { x: 92, y: 37 },
+  { x: 78, y: 42 },
+  { x: 64, y: 36 },
+  { x: 50, y: 42 },
+  { x: 36, y: 36 },
+  { x: 22, y: 42 },
+  { x: 8, y: 37 },
+  // Row 3: Stages 15..21 (Left -> Right)
+  { x: 8, y: 61 },
+  { x: 22, y: 66 },
+  { x: 36, y: 60 },
+  { x: 50, y: 66 },
+  { x: 64, y: 60 },
+  { x: 78, y: 66 },
+  { x: 92, y: 61 },
+  // Row 4: Stages 22..28 (Right -> Left)
+  { x: 92, y: 84 },
+  { x: 78, y: 89 },
+  { x: 64, y: 83 },
+  { x: 50, y: 89 },
+  { x: 36, y: 83 },
+  { x: 22, y: 89 },
+  { x: 8, y: 84 },
 ];
 
 export function GalaxyMap({
@@ -155,10 +166,10 @@ export function GalaxyMap({
         </div>
       </div>
 
-      {/* Sharp Crystalline Refraction Constellation Map (18 Stages) */}
+      {/* Sharp Crystalline Refraction Constellation Map (28 Stages) */}
       <div className="relative flex-1 flex items-center justify-center my-1 min-h-0">
         {isDesktop ? (
-          <div className="relative w-full max-w-6xl h-[495px]">
+          <div className="relative w-full max-w-6xl h-[520px]">
             <svg
               viewBox="0 0 100 100"
               preserveAspectRatio="none"
@@ -189,11 +200,11 @@ export function GalaxyMap({
                 const stageNum = (idx + 2) as StageNumber;
                 const unlocked = isStageUnlocked(progress, selectedAge, stageNum);
                 const highlighted = hoveredStage !== null && stageNum <= hoveredStage && unlocked;
-                const isTurn = idx === 5 || idx === 11;
-                const mx = isTurn ? (idx === 5 ? 95.5 : 4.5) : (pos.x + next.x) / 2;
+                const isTurn = idx === 6 || idx === 13 || idx === 20;
+                const mx = isTurn ? (idx === 13 ? 3.5 : 96.5) : (pos.x + next.x) / 2;
                 const my = isTurn
                   ? (pos.y + next.y) / 2
-                  : (pos.y + next.y) / 2 + (idx % 2 === 0 ? -4 : 4);
+                  : (pos.y + next.y) / 2 + (idx % 2 === 0 ? -3 : 3);
                 const d = `M ${pos.x} ${pos.y} L ${mx} ${my} L ${next.x} ${next.y}`;
 
                 return (
@@ -280,7 +291,7 @@ export function GalaxyMap({
                             }
                           : undefined
                       }
-                      className={`relative w-16 h-16 rounded-xl flex items-center justify-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
+                      className={`relative w-13 h-13 rounded-xl flex items-center justify-center transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white ${
                         !unlocked
                           ? 'bg-[#090D28]/92 border border-[#2C356E] text-indigo-300/45 cursor-not-allowed'
                           : earned
@@ -297,18 +308,18 @@ export function GalaxyMap({
                         />
                       )}
                       {!unlocked ? (
-                        <Lock className="w-4.5 h-4.5 opacity-75" />
+                        <Lock className="w-4 h-4 opacity-75" />
                       ) : earned ? (
                         <CosmicMedalEmblem
                           shape={desc.medalShape}
                           accentHex={desc.accentHex}
                           earned={true}
-                          size={50}
+                          size={42}
                         />
                       ) : (
                         <PillarIcon
                           pillar={desc.pillar}
-                          className="w-7 h-7"
+                          className="w-6 h-6"
                           color={desc.accentHex}
                         />
                       )}
@@ -331,7 +342,7 @@ export function GalaxyMap({
             })}
           </div>
         ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-2.5 w-full max-w-xl">
+          <div className="grid grid-cols-4 sm:grid-cols-7 gap-2 w-full max-w-xl max-h-full overflow-y-auto py-1">
             {STAGE_DESCRIPTORS.map((desc) => {
               const unlocked = isStageUnlocked(progress, selectedAge, desc.stage);
               const earned = hasEarnedMedal(progress, selectedAge, desc.stage);

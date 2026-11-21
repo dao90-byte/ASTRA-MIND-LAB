@@ -265,8 +265,16 @@ export default function App() {
           </div>
 
           {/* Active Stage Board */}
-          <div className="flex-1 min-h-0 w-full flex items-center justify-center">
-            {(activeStage === 1 || activeStage === 5 || activeStage === 9 || activeStage === 14) && (
+          <div
+            key={`${selectedAge}-${activeStage}-${resetSignal}`}
+            className="flex-1 min-h-0 w-full flex items-center justify-center animate-stage-enter"
+          >
+            {(activeStage === 1 ||
+              activeStage === 5 ||
+              activeStage === 9 ||
+              activeStage === 14 ||
+              activeStage === 19 ||
+              activeStage === 24) && (
               <SystemBoard
                 age={selectedAge}
                 stageNumber={activeStage}
@@ -274,7 +282,12 @@ export default function App() {
                 onWin={handleStageWin}
               />
             )}
-            {(activeStage === 2 || activeStage === 6 || activeStage === 10 || activeStage === 15) && (
+            {(activeStage === 2 ||
+              activeStage === 6 ||
+              activeStage === 10 ||
+              activeStage === 15 ||
+              activeStage === 20 ||
+              activeStage === 25) && (
               <InhibitoryBoard
                 age={selectedAge}
                 stageNumber={activeStage}
@@ -282,7 +295,11 @@ export default function App() {
                 onWin={handleStageWin}
               />
             )}
-            {(activeStage === 3 || activeStage === 11 || activeStage === 16) && (
+            {(activeStage === 3 ||
+              activeStage === 11 ||
+              activeStage === 16 ||
+              activeStage === 21 ||
+              activeStage === 26) && (
               <MemoryMazeBoard
                 age={selectedAge}
                 stageNumber={activeStage}
@@ -290,7 +307,11 @@ export default function App() {
                 onWin={handleStageWin}
               />
             )}
-            {(activeStage === 7 || activeStage === 12 || activeStage === 17) && (
+            {(activeStage === 7 ||
+              activeStage === 12 ||
+              activeStage === 17 ||
+              activeStage === 22 ||
+              activeStage === 27) && (
               <Spatial3DBoard
                 age={selectedAge}
                 stageNumber={activeStage}
@@ -298,7 +319,12 @@ export default function App() {
                 onWin={handleStageWin}
               />
             )}
-            {(activeStage === 4 || activeStage === 8 || activeStage === 13 || activeStage === 18) && (
+            {(activeStage === 4 ||
+              activeStage === 8 ||
+              activeStage === 13 ||
+              activeStage === 18 ||
+              activeStage === 23 ||
+              activeStage === 28) && (
               <SandboxBoard
                 age={selectedAge}
                 stageNumber={activeStage}
